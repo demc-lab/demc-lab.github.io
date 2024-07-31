@@ -1,74 +1,43 @@
-{\rtf1\ansi\ansicpg1252\cocoartf2761
-\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
-{\colortbl;\red255\green255\blue255;}
-{\*\expandedcolortbl;;}
-\margl1440\margr1440\vieww11520\viewh8400\viewkind0
-\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f5f5f5;
+    color: #333;
+}
 
-\f0\fs24 \cf0 body \{\
-    font-family: Arial, sans-serif;\
-    margin: 0;\
-    padding: 0;\
-    background-color: #f5f5f5;\
-    color: #333;\
-\}\
-\
-header \{\
-    background-color: #990000; /* Crimson */\
-    color: white;\
-    padding: 1em 0;\
-    text-align: center;\
-\}\
-\
-nav ul \{\
-    list-style: none;\
-    padding: 0;\
-\}\
-\
-nav ul li \{\
-    display: inline;\
-    margin: 0 1em;\
-\}\
-\
-nav ul li a \{\
-    color: white;\
-    text-decoration: none;\
-\}\
-\
-main \{\
-    padding: 2em;\
-\}\
-\
-footer \{\
-    background-color: #990000; /* Crimson */\
-    color: white;\
-    text-align: center;\
-    padding: 1em 0;\
-    position: fixed;\
-    width: 100%;\
-    bottom: 0;\
-\}\
-\
-.people, .projects, .publications \{\
-    display: flex;\
-    flex-wrap: wrap;\
-\}\
-\
-.person, .project, .publication \{\
-    margin: 1em;\
-    padding: 1em;\
-    background-color: #fff;\
-    border: 1px solid #ccc;\
-    border-radius: 8px;\
-    width: calc(33% - 2em);\
-\}\
-\
-.person img \{\
-    max-width: 100%;\
-    border-radius: 50%;\
-\}\
-\
-h1, h2, h3 \{\
-    color: #990000; /* Crimson */\
-\}\
+header {
+    background-color: #990000; /* Crimson */
+    color: white;
+    padding: 1em 0;
+    text-align: center;
+}
+
+nav ul {
+    list-style: none;
+    padding: 0;
+}
+
+nav ul li {
+    display: inline;
+    margin: 0 1em;
+}
+
+nav ul li a {
+    color: white;
+    text-decoration: none;
+}
+
+main {
+    padding: 2em;
+}
+
+footer {
+    background-color: #990000; /* Crimson */
+    color: white;
+    text-align: center;
+    padding: 1em 0;
+    position: fixed;
+    width: 100%;
+    bottom: 0;
 }
