@@ -42,7 +42,8 @@ footer {
     bottom: 0;
 }
 
-.title-link {
+/* Higher specificity for the title link */
+header h1 a.title-link {
     color: white;
     text-decoration: none;
 }
