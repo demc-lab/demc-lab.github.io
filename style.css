@@ -41,3 +41,8 @@ footer {
     width: 100%;
     bottom: 0;
 }
+
+.title-link {
+    color: white;
+    text-decoration: none;
+}
