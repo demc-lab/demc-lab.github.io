@@ -131,3 +131,18 @@ a {
 a:hover {
     text-decoration: underline;
 }
+
+
+/* Adjust box width for better presentation on desktop */
+.person p, .projects article, .publications article {
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Ensure full-width boxes on mobile devices */
+@media (max-width: 768px) {
+    .person p, .projects article, .publications article {
+        max-width: 100%;
+    }
+}
