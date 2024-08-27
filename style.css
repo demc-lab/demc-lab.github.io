@@ -146,3 +146,15 @@ a:hover {
         max-width: 100%;
     }
 }
+
+
+/* Center the content within boxes */
+.person p, .projects article, .publications article {
+    text-align: center;
+}
+
+/* Ensure main content is centered on the page */
+main {
+    max-width: 800px;
+    margin: 0 auto;
+}
