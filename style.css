@@ -1,3 +1,4 @@
+
 body {
     font-family: Arial, sans-serif;
     margin: 0;
@@ -156,7 +157,6 @@ a:hover {
         max-width: 100%;
     }
 }
-
 
 /* Center the content within boxes */
 .person p, .projects article, .publications article {
