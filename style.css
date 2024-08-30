@@ -132,6 +132,16 @@ a:hover {
     text-decoration: underline;
 }
 
+.gif-container {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.responsive-gif {
+    max-width: 100%;
+    height: auto;
+    width: auto; /* Ensures the image retains its aspect ratio */
+}
 
 /* Adjust box width for better presentation on desktop */
 .person p, .projects article, .publications article {
