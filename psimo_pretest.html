@@ -8,19 +8,32 @@
     <title>Survey Link Alternator</title>
     <script>
         function displayLink() {
-            const linkA = '<a href="https://google.com/" target="_blank">Start Survey</a>';
-            const linkB = '<a href="https://cnn.com/" target="_blank">Start Survey</a>';
+            
+            // Get the current time
+            const now = new Date();
+            const minutes = now.getMinutes();
 
-            // Check local storage for the last link shown
-            let lastLink = localStorage.getItem('lastLink');
-
-            // Alternate between links
-            const nextLink = lastLink === 'B' ? 'A' : 'B';
-            localStorage.setItem('lastLink', nextLink);
-
-            // Display the next link
-            const linkToShow = nextLink === 'A' ? linkA : linkB;
-            document.getElementById('survey-link').innerHTML = linkToShow;
+            // Check if the current time is within the first 5 minutes of the hour
+            if (minutes < 6) {
+                
+                // Define links
+                const linkA = '<a href="https://google.com/" target="_blank">Start Survey</a>';
+                const linkB = '<a href="https://cnn.com/" target="_blank">Start Survey</a>';
+                
+                // Randomly pick one link to display
+                const randomLink = Math.random() < 0.5 ? linkA : linkB;
+                
+                // Insert the link into the placeholder
+                document.getElementById('survey-link').innerHTML = randomLink;
+                
+                // Insert the link into the placeholder
+                document.getElementById('survey-link').innerHTML = randomLink;
+                
+            } else {
+                // Inform the user the link is not available
+                document.getElementById('survey-link').innerHTML = 
+                    "The survey link is currently unavailable. Please check back during the first 5 minutes of the next hour.";
+            }
         }
     </script>
 </head>
@@ -40,7 +53,7 @@
     </header>
     
     <h1>Welcome!</h1>
-    <p>Click the link below to begin:</p>
+    <p>Click the link below to begin (only available during the first 5 minutes of every hour today):</p>
     <div id="survey-link"></div>
     
     <footer>
