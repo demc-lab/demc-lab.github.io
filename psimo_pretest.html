@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dynamic Environments and Meaning Change Lab</title>
-    <link rel="stylesheet" href="style.css">
-        <script>
+    <title>Survey Link Alternator</title>
+    <script>
         function displayLink() {
-            const linkA = '<a href="https://www.google.com/" target="_blank">Start Survey A</a>';
-            const linkB = '<a href="https://www.cnn.com/" target="_blank">Start Survey B</a>';
+            const linkA = '<a href="https://example.com/surveyA" target="_blank">Start Survey A</a>';
+            const linkB = '<a href="https://example.com/surveyB" target="_blank">Start Survey B</a>';
 
             // Check local storage for the last link shown
             let lastLink = localStorage.getItem('lastLink');
@@ -23,29 +22,9 @@
         }
     </script>
 </head>
-<body>
-    <header>
-        <h1><a href="index.html" class="title-link">Dynamic Environments and Meaning Change Lab</a></h1>
-        <nav>
-            <ul>
-                <li><a href="index.html">About</a></li>
-                <li><a href="people.html">People</a></li>
-                <li><a href="projects.html">Projects</a></li>
-                <li><a href="publications.html">Pubs</a></li>
-                <li><a href="contact.html">Contact</a></li>
-            </ul>
-        </nav>
-    </header>
-    <main>
-        <h2>Study Link</h2>
-        <div class="projects">
-   <h1>Welcome!</h1>
+<body onload="displayLink()">
+    <h1>Welcome to the Survey</h1>
     <p>Click the link below to begin:</p>
     <div id="survey-link"></div>
-        </div>
-    </main>
-    <footer>
-        <p>&copy; 2024 Dynamic Environments and Meaning Change Lab</p>
-    </footer>
 </body>
 </html>
