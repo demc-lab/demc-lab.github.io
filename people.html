@@ -1,47 +1,72 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dynamic Environments and Meaning Change Lab</title>
-    <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Dynamic Environments and Meaning Change Lab – People</title>
+    <link rel="stylesheet" href="style.css"/>
+
+    <!-- PAGE‑SPECIFIC OVERRIDES FOR PEOPLE LIST -->
+    <style>
+      /* 1. Remove the gray boxes and shadows around each name */
+      .people .person p {
+        background: none !important;
+        padding: 0 !important;
+        margin: 0.5em 0;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+      }
+
+      /* 2. Burgundy links, no underline */
+      .people .person a {
+        color: #660000;          /* a few shades darker than #990000 */
+        text-decoration: none;
+      }
+      .people .person a:hover {
+        text-decoration: underline;
+      }
+    </style>
 </head>
 <body>
-    <header>
-        <h1><a href="index.html" class="title-link">Dynamic Environments and Meaning Change Lab</a></h1>
-        <nav>
-            <ul>
-                <li><a href="index.html">About</a></li>
-                <li><a href="people.html">People</a></li>
-                <li><a href="projects.html">Projects</a></li>
-                <li><a href="publications.html">Pubs</a></li>
-                <li><a href="contact.html">Contact</a></li>
-            </ul>
-        </nav>
-    </header>
-    <main>
-        <div class="people">
-            <!-- Add images and names of lab members here -->
-            <div class="person">
-                <p><a href="https://josephquinn.github.io/" target="_blank">Joseph Quinn (PI)</a></p>
-            </div>
-        <h3>Graduate Students</h3>
-            <div class="person">
-                <p>Valerie Barron</p>
-                <p>Mohona Mandal</p>
-                <p><a href="https://sites.google.com/view/vikimoney" target="_blank">Victoria Money</a></p>
-                <p><a href="https://sites.google.com/view/bijoyetri-samaddar/home?authuser=1" target="_blank">Bijoyetri Samaddar</a></p>
-            </div>
-        <h3>Undergraduate Students</h3>
-            <div class="person">
-                <p>Joshua Evans</p>
-                <p>Andrés Gonzalez</p>
-                <p>Aaron McLeod</p>
-            </div>
-        </div>
-    </main>
-    <footer>
-        <p>&copy; Dynamic Environments and Meaning Change Lab</p>
-    </footer>
+  <header>
+    <!-- … your existing header/nav … -->
+  </header>
+
+  <main>
+    <div class="people">
+      
+      <h3>Director</h3>
+      <div class="person">
+        <p>
+          <a href="https://sc.edu/study/colleges_schools/artsandsciences/sociology/our_people/faculty_staff_directory/quinn_joseph.php" target="_blank">
+            Joe Quinn, PhD
+          </a>
+        </p>
+      </div>
+
+      <h3>Graduate Students</h3>
+      <div class="person">
+        <p>Valerie Barron</p>
+        <p>Mohona Mandal</p>
+        <p>
+          <a href="https://sociology.wisc.edu/staff/samaddar-bijoyetri/" target="_blank">
+            Bijoyetri Samaddar
+          </a>
+        </p>
+      </div>
+
+      <h3>Undergraduate Students</h3>
+      <div class="person">
+        <p>Joshua Evans</p>
+        <p>Paige Little</p>
+        <p>Aaron McLeod</p>
+      </div>
+
+    </div>
+  </main>
+
+  <footer>
+    <!-- … your existing footer … -->
+  </footer>
 </body>
 </html>
