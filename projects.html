@@ -3,12 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dynamic Environments and Meaning Change Lab</title>
+    <title>Dynamic Environments and Meaning Change Lab – Projects</title>
     <link rel="stylesheet" href="style.css">
+
+    <!-- PAGE‑SPECIFIC OVERRIDES FOR PROJECT LAYOUT -->
+    <style>
+      /* Container for each project: flex to place text & image side by side */
+      .projects article {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: 2em;
+      }
+
+      /* Ensure project titles are left‑aligned and span full width */
+      .projects article h4 {
+        flex-basis: 100%;
+        text-align: left;
+        margin-bottom: 0.5em;
+      }
+
+      /* Left column: the text */
+      .project-text {
+        flex: 1 1 60%;
+        text-align: left;
+        margin-right: 1em;
+      }
+      .project-text p {
+        /* remove any gray‑box styling inherited from style.css */
+        background: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+      }
+
+      /* Right column: the image placeholder */
+      .project-image {
+        flex: 1 1 35%;
+        text-align: right;
+      }
+      .project-image img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+      }
+
+      /* Tweak the intro paragraph spacing */
+      .projects > p {
+        margin-bottom: 1.5em;
+      }
+    </style>
 </head>
 <body>
     <header>
-        <h1><a href="index.html" class="title-link">Dynamic Environments and Meaning Change Lab</a></h1>
+        <h1>
+          <a href="index.html" class="title-link">
+            Dynamic Environments and Meaning Change Lab
+          </a>
+        </h1>
         <nav>
             <ul>
                 <li><a href="index.html">About</a></li>
@@ -19,33 +73,76 @@
             </ul>
         </nav>
     </header>
+
     <main>
-        <h2>What we're working on</h2>
+        <h2>What we’re working on</h2>
         <div class="projects">
-            <!-- Add brief summaries of ongoing work here -->
-            <p>Here are the names of some projects we're working on. Reach out for more information.</p>
+            <p>Here are the names of some projects we’re working on. Reach out for more information.</p>
+
             <article>
                 <h4>Cultural Evolution in an Unsettled Time</h4>
-                <p></p>
+                <div class="project-text">
+                    <p>
+                      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent vitae eros eget tellus tristique bibendum. Donec rutrum sed sem quis venenatis.
+                    </p>
+                </div>
+                <div class="project-image">
+                    <!-- Replace src with your image URL -->
+                    <img src="path/to/image1.jpg" alt="Cultural Evolution project image">
+                </div>
             </article>
+
             <article>
                 <h4>A Search-Based Model of Social Contagion</h4>
-                <p></p>
+                <div class="project-text">
+                    <p>
+                      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent vitae eros eget tellus tristique bibendum. Donec rutrum sed sem quis venenatis.
+                    </p>
+                </div>
+                <div class="project-image">
+                    <img src="path/to/image2.jpg" alt="Social Contagion model image">
+                </div>
             </article>
+
             <article>
                 <h4>Mechanisms of Dyadic Tie-Formation in Cooperative and Competitive Settings</h4>
-                <p></p>
+                <div class="project-text">
+                    <p>
+                      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent vitae eros eget tellus tristique bibendum. Donec rutrum sed sem quis venenatis.
+                    </p>
+                </div>
+                <div class="project-image">
+                    <img src="path/to/image3.jpg" alt="Dyadic Tie-Formation image">
+                </div>
             </article>
+
             <article>
                 <h4>Status Construction through Narrative Transmission</h4>
-                <p></p>
+                <div class="project-text">
+                    <p>
+                      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent vitae eros eget tellus tristique bibendum. Donec rutrum sed sem quis venenatis.
+                    </p>
+                </div>
+                <div class="project-image">
+                    <img src="path/to/image4.jpg" alt="Narrative Transmission image">
+                </div>
             </article>
+
             <article>
                 <h4>A Critical Homophily Simulation</h4>
-                <p></p>
-            </article> 
+                <div class="project-text">
+                    <p>
+                      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent vitae eros eget tellus tristique bibendum. Donec rutrum sed sem quis venenatis.
+                    </p>
+                </div>
+                <div class="project-image">
+                    <img src="path/to/image5.jpg" alt="Homophily Simulation image">
+                </div>
+            </article>
+
         </div>
     </main>
+
     <footer>
         <p>&copy; 2024 Dynamic Environments and Meaning Change Lab</p>
     </footer>
