@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Article Download Tracker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #111827;
+      --accent: #38bdf8;
+      --accent-soft: rgba(56,189,248,0.15);
+      --accent-strong: #22c55e;
+      --danger: #f97373;
+      --text-main: #e5e7eb;
+      --text-muted: #9ca3af;
+      --border-subtle: #1f2937;
+      --radius-lg: 16px;
+      --radius-pill: 999px;
+      --shadow-soft: 0 20px 40px rgba(0,0,0,0.5);
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(circle at top, #1e293b 0, #020617 50%, #000 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+    }
+
+    .page {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px 16px 48px;
+    }
+
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .title-block h1 {
+      margin: 0;
+      font-size: 1.7rem;
+      letter-spacing: 0.03em;
+    }
+
+    .title-block p {
+      margin: 4px 0 0;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .date-badge {
+      padding: 6px 14px;
+      border-radius: var(--radius-pill);
+      background: rgba(15,23,42,0.85);
+      border: 1px solid var(--border-subtle);
+      font-size: 0.85rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .date-badge span:first-child {
+      color: var(--accent);
+      font-size: 1rem;
+    }
+
+    .hint {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 18px;
+    }
+
+    .card {
+      background: linear-gradient(145deg, rgba(15,23,42,0.95), rgba(15,23,42,0.8));
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-subtle);
+      padding: 16px 14px 14px;
+      box-shadow: var(--shadow-soft);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .name {
+      font-weight: 600;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .name-tag {
+      font-size: 0.7rem;
+      padding: 2px 6px;
+      border-radius: var(--radius-pill);
+      border: 1px solid rgba(148,163,184,0.4);
+      color: var(--text-muted);
+    }
+
+    .daily-target {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-align: right;
+    }
+
+    .daily-target strong {
+      color: var(--accent);
+    }
+
+    .progress-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      font-size: 0.85rem;
+      margin-bottom: 6px;
+    }
+
+    .progress-bar-container {
+      width: 100%;
+      height: 8px;
+      border-radius: var(--radius-pill);
+      background: #020617;
+      overflow: hidden;
+      margin-bottom: 6px;
+      border: 1px solid #1f2937;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0;
+      border-radius: var(--radius-pill);
+      background: linear-gradient(90deg, var(--accent), var(--accent-strong));
+      transition: width 0.25s ease-out;
+    }
+
+    .progress-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    button {
+      border: none;
+      outline: none;
+      border-radius: var(--radius-pill);
+      padding: 6px 10px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: transform 0.08s ease-out, box-shadow 0.08s ease-out, background 0.2s;
+      white-space: nowrap;
+    }
+
+    button:active {
+      transform: translateY(1px) scale(0.98);
+      box-shadow: none;
+    }
+
+    .btn-main {
+      background: radial-gradient(circle at top, var(--accent), #0ea5e9);
+      color: #0b1120;
+      box-shadow: 0 10px 18px rgba(56,189,248,0.35);
+    }
+
+    .btn-main:hover {
+      filter: brightness(1.05);
+    }
+
+    .btn-secondary {
+      background: rgba(15,23,42,0.9);
+      color: var(--text-main);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(15,23,42,1);
+    }
+
+    .btn-danger {
+      background: rgba(127,29,29,0.9);
+      color: #fee2e2;
+      border: 1px solid rgba(248,113,113,0.5);
+    }
+
+    .btn-danger:hover {
+      background: rgba(127,29,29,1);
+    }
+
+    .stats-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.75rem;
+      margin-top: 6px;
+      gap: 8px;
+    }
+
+    .stat-pill {
+      padding: 4px 8px;
+      border-radius: var(--radius-pill);
+      background: rgba(15,23,42,0.9);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .stat-pill span.value {
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    .achievements {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+      font-size: 0.7rem;
+    }
+
+    .badge {
+      padding: 3px 8px;
+      border-radius: var(--radius-pill);
+      border: 1px solid rgba(55,65,81,0.8);
+      color: var(--text-muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .badge.on {
+      border-color: rgba(34,197,94,0.9);
+      background: rgba(22,163,74,0.12);
+      color: #bbf7d0;
+    }
+
+    .badge strong {
+      color: inherit;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      opacity: 0;
+      background: radial-gradient(circle at top left, rgba(56,189,248,0.12), transparent 60%);
+      pointer-events: none;
+      transition: opacity 0.3s ease-out;
+    }
+
+    .card.glow::before {
+      opacity: 1;
+    }
+
+    /* Celebration overlay */
+    .celebration-overlay {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+      opacity: 0;
+      transition: opacity 0.15s ease-out;
+    }
+
+    .celebration-overlay.visible {
+      opacity: 1;
+    }
+
+    .celebration-box {
+      background: rgba(15,23,42,0.96);
+      border-radius: 20px;
+      border: 1px solid rgba(56,189,248,0.6);
+      padding: 14px 20px;
+      text-align: center;
+      min-width: 240px;
+      max-width: 320px;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.8);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .celebration-title {
+      font-size: 1rem;
+      margin-bottom: 4px;
+    }
+
+    .celebration-sub {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .confetti {
+      position: absolute;
+      font-size: 1.2rem;
+      animation: confetti-fall 0.9s linear forwards;
+    }
+
+    @keyframes confetti-fall {
+      0% {
+        opacity: 0;
+        transform: translateY(-60px) translateX(0) rotate(0deg) scale(0.7);
+      }
+      15% {
+        opacity: 1;
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(60px) translateX(40px) rotate(220deg) scale(1);
+      }
+    }
+
+    footer {
+      margin-top: 26px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <div class="title-block">
+        <h1>Article Download Quest</h1>
+        <p>Log your batches, hit your daily goals, and watch the team’s progress.</p>
+      </div>
+      <div>
+        <div class="date-badge">
+          <span>📅</span>
+          <span id="current-date">Loading date…</span>
+        </div>
+      </div>
+    </header>
+
+    <p class="hint">
+      Each button updates only this browser (data is stored locally). Daily counts reset at midnight, but your cumulative stats persist.
+    </p>
+
+    <div class="grid" id="cards-container">
+      <!-- Cards injected by JS -->
+    </div>
+
+    <footer>
+      Tip: Have students keep this tab open and tap <strong>+250</strong> or <strong>+500</strong> as they complete batches.
+      The page will auto-reset daily while keeping lifetime stats.
+    </footer>
+  </div>
+
+  <!-- Celebration overlay -->
+  <div class="celebration-overlay" id="celebration">
+    <div class="celebration-box">
+      <div class="celebration-title" id="celebration-title">Nice!</div>
+      <div class="celebration-sub" id="celebration-sub"></div>
+    </div>
+  </div>
+
+  <script>
+    /***********************
+     * CONFIGURE STUDENTS  *
+     ***********************/
+    const initialStudents = [
+      { id: "student1", name: "Student 1" },
+      { id: "student2", name: "Student 2" },
+      { id: "student3", name: "Student 3" },
+      { id: "student4", name: "Student 4" },
+      { id: "student5", name: "Student 5" },
+      { id: "instructor", name: "You (Instructor)" }
+    ];
+
+    const DAILY_GOAL = 2000;
+    const DAILY_MAX = 2500;
+    const SESSION_SIZE = 500;
+    const STORAGE_KEY = "download_tracker_v1";
+
+    /***********************
+     * UTILITIES           *
+     ***********************/
+    function todayString() {
+      const d = new Date();
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, "0");
+      const dd = String(d.getDate()).padStart(2, "0");
+      return `${yyyy}-${mm}-${dd}`;
+    }
+
+    function formatNiceDate(dateStr) {
+      const d = new Date(dateStr);
+      if (Number.isNaN(d.getTime())) {
+        const parts = dateStr.split("-");
+        if (parts.length === 3) {
+          const [y,m,day] = parts.map(p => parseInt(p,10));
+          return new Date(y, m-1, day).toLocaleDateString(undefined, {
+            weekday: "short", month: "short", day: "numeric"
+          });
+        }
+        return dateStr;
+      }
+      return d.toLocaleDateString(undefined, {
+        weekday: "short",
+        month: "short",
+        day: "numeric"
+      });
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return null;
+        return JSON.parse(raw);
+      } catch (e) {
+        console.warn("Could not load state:", e);
+        return null;
+      }
+    }
+
+    function saveState(state) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (e) {
+        console.warn("Could not save state:", e);
+      }
+    }
+
+    /***********************
+     * INITIALIZE STATE    *
+     ***********************/
+    function ensureState() {
+      const today = todayString();
+      let state = loadState();
+
+      if (!state) {
+        state = {
+          lastSeenDate: today,
+          students: {}
+        };
+        initialStudents.forEach(s => {
+          state.students[s.id] = {
+            id: s.id,
+            name: s.name,
+            todayDocs: 0,
+            lifetimeDocs: 0,
+            daysHitGoal: 0,
+            daysHitMax: 0,
+            streakSessionsToday: 0,
+            lastDate: today
+          };
+        });
+        saveState(state);
+        return state;
+      }
+
+      // Ensure all configured students exist
+      initialStudents.forEach(s => {
+        if (!state.students[s.id]) {
+          state.students[s.id] = {
+            id: s.id,
+            name: s.name,
+            todayDocs: 0,
+            lifetimeDocs: 0,
+            daysHitGoal: 0,
+            daysHitMax: 0,
+            streakSessionsToday: 0,
+            lastDate: today
+          };
+        } else if (!state.students[s.id].name) {
+          state.students[s.id].name = s.name;
+        }
+      });
+
+      // Handle date change / daily reset
+      const prevDate = state.lastSeenDate;
+      if (prevDate !== today) {
+        // For each student, roll yesterday into cumulative stats
+        Object.values(state.students).forEach(stu => {
+          if (stu.lastDate === prevDate) {
+            const docs = stu.todayDocs || 0;
+            if (docs >= DAILY_GOAL) stu.daysHitGoal = (stu.daysHitGoal || 0) + 1;
+            if (docs >= DAILY_MAX) stu.daysHitMax = (stu.daysHitMax || 0) + 1;
+            stu.lifetimeDocs = (stu.lifetimeDocs || 0) + docs;
+          }
+          // Reset daily stats
+          stu.todayDocs = 0;
+          stu.streakSessionsToday = 0;
+          stu.lastDate = today;
+        });
+        state.lastSeenDate = today;
+        saveState(state);
+      }
+
+      return state;
+    }
+
+    /***********************
+     * RENDER UI           *
+     ***********************/
+    let appState = ensureState();
+
+    function renderDate() {
+      const el = document.getElementById("current-date");
+      el.textContent = `${formatNiceDate(todayString())}`;
+    }
+
+    function createCard(stu) {
+      const card = document.createElement("div");
+      card.className = "card";
+      card.dataset.studentId = stu.id;
+
+      card.innerHTML = `
+        <div class="card-header">
+          <div class="name">
+            <span>${stu.name}</span>
+            <span class="name-tag">${stu.id === "instructor" ? "Lead" : "RA"}</span>
+          </div>
+          <div class="daily-target">
+            Target: <strong>${DAILY_GOAL.toLocaleString()}</strong><br>
+            Max: <strong>${DAILY_MAX.toLocaleString()}</strong>
+          </div>
+        </div>
+        <div class="progress-row">
+          <div>Today: <strong><span class="today-docs">${stu.todayDocs}</span> / ${DAILY_MAX}</strong></div>
+          <div style="font-size:0.8rem;color:var(--text-muted);">
+            Sessions: <span class="today-sessions">${Math.floor(stu.todayDocs / SESSION_SIZE)}</span>
+          </div>
+        </div>
+        <div class="progress-bar-container">
+          <div class="progress-bar"></div>
+        </div>
+        <div class="progress-labels">
+          <span>0</span>
+          <span>${DAILY_GOAL.toLocaleString()} (goal)</span>
+          <span>${DAILY_MAX.toLocaleString()} (max)</span>
+        </div>
+        <div class="buttons">
+          <button class="btn-main" data-inc="250">+250</button>
+          <button class="btn-main" data-inc="500">+500</button>
+          <button class="btn-secondary" data-setgoal="${DAILY_GOAL}">Set to ${DAILY_GOAL}</button>
+          <button class="btn-danger" data-dec="250">-250</button>
+        </div>
+        <div class="stats-row">
+          <span class="stat-pill">
+            🔁 Sessions today:
+            <span class="value today-sessions-pill">${Math.floor(stu.todayDocs / SESSION_SIZE)}</span>
+          </span>
+          <span class="stat-pill">
+            📚 Lifetime: <span class="value lifetime-docs">${stu.lifetimeDocs}</span>
+          </span>
+        </div>
+        <div class="achievements">
+          <span class="badge badge-goal ${stu.todayDocs >= DAILY_GOAL ? "on" : ""}">
+            🏆 <strong>${stu.daysHitGoal}</strong> days ≥ ${DAILY_GOAL}
+          </span>
+          <span class="badge badge-max ${stu.todayDocs >= DAILY_MAX ? "on" : ""}">
+            🌟 <strong>${stu.daysHitMax}</strong> days ≥ ${DAILY_MAX}
+          </span>
+        </div>
+      `;
+
+      // Attach button handlers
+      const buttons = card.querySelectorAll("button");
+      buttons.forEach(btn => {
+        if (btn.dataset.inc) {
+          btn.addEventListener("click", () => changeDocs(stu.id, parseInt(btn.dataset.inc, 10)));
+        } else if (btn.dataset.dec) {
+          btn.addEventListener("click", () => changeDocs(stu.id, -parseInt(btn.dataset.dec, 10)));
+        } else if (btn.dataset.setgoal) {
+          btn.addEventListener("click", () => setDocsToGoal(stu.id, parseInt(btn.dataset.setgoal, 10)));
+        }
+      });
+
+      return card;
+    }
+
+    function renderAll() {
+      const container = document.getElementById("cards-container");
+      container.innerHTML = "";
+      Object.values(appState.students).forEach(stu => {
+        const card = createCard(stu);
+        container.appendChild(card);
+        updateCardVisuals(stu.id);
+      });
+    }
+
+    function updateCardVisuals(studentId) {
+      const stu = appState.students[studentId];
+      const card = document.querySelector(`.card[data-student-id="${studentId}"]`);
+      if (!card) return;
+
+      const todayDocsEl = card.querySelector(".today-docs");
+      const todaySesEl = card.querySelector(".today-sessions");
+      const todaySesPill = card.querySelector(".today-sessions-pill");
+      const lifetimeEl = card.querySelector(".lifetime-docs");
+      const bar = card.querySelector(".progress-bar");
+      const badgeGoal = card.querySelector(".badge-goal");
+      const badgeMax = card.querySelector(".badge-max");
+
+      const sessions = Math.floor(stu.todayDocs / SESSION_SIZE);
+      const pct = Math.min(100, (stu.todayDocs / DAILY_MAX) * 100);
+
+      todayDocsEl.textContent = stu.todayDocs;
+      todaySesEl.textContent = sessions;
+      todaySesPill.textContent = sessions;
+      lifetimeEl.textContent = stu.lifetimeDocs;
+      bar.style.width = pct + "%";
+
+      // Achievements
+      if (stu.todayDocs >= DAILY_GOAL) badgeGoal.classList.add("on");
+      else badgeGoal.classList.remove("on");
+
+      if (stu.todayDocs >= DAILY_MAX) badgeMax.classList.add("on");
+      else badgeMax.classList.remove("on");
+
+      // Glow effect when near/above goal
+      if (stu.todayDocs >= DAILY_GOAL) card.classList.add("glow");
+      else card.classList.remove("glow");
+    }
+
+    /***********************
+     * STATE UPDATES       *
+     ***********************/
+    function changeDocs(studentId, delta) {
+      const stu = appState.students[studentId];
+      const prevDocs = stu.todayDocs;
+      let newDocs = prevDocs + delta;
+
+      if (newDocs < 0) newDocs = 0;
+      if (newDocs > DAILY_MAX) newDocs = DAILY_MAX;
+
+      stu.todayDocs = newDocs;
+
+      // Track streak: only based on 500-doc session completions in this day
+      const prevSessions = Math.floor(prevDocs / SESSION_SIZE);
+      const newSessions = Math.floor(newDocs / SESSION_SIZE);
+      if (newSessions > prevSessions && delta > 0) {
+        stu.streakSessionsToday = (stu.streakSessionsToday || 0) + (newSessions - prevSessions);
+        triggerCelebration("session", stu.name, stu.streakSessionsToday);
+      }
+
+      // Goal achievements
+      const crossedGoal = prevDocs < DAILY_GOAL && newDocs >= DAILY_GOAL;
+      const crossedMax = prevDocs < DAILY_MAX && newDocs >= DAILY_MAX;
+
+      if (crossedGoal) {
+        triggerCelebration("goal", stu.name);
+      }
+      if (crossedMax) {
+        triggerCelebration("max", stu.name);
+      }
+
+      saveState(appState);
+      updateCardVisuals(studentId);
+    }
+
+    function setDocsToGoal(studentId, goal) {
+      const stu = appState.students[studentId];
+      const prevDocs = stu.todayDocs;
+      let newDocs = goal;
+      if (newDocs > DAILY_MAX) newDocs = DAILY_MAX;
+      if (newDocs < 0) newDocs = 0;
+      stu.todayDocs = newDocs;
+
+      // Streak adjustment if we jumped over sessions
+      const prevSessions = Math.floor(prevDocs / SESSION_SIZE);
+      const newSessions = Math.floor(newDocs / SESSION_SIZE);
+      if (newSessions > prevSessions) {
+        const additional = newSessions - prevSessions;
+        stu.streakSessionsToday = (stu.streakSessionsToday || 0) + additional;
+        triggerCelebration("session", stu.name, stu.streakSessionsToday);
+      }
+
+      const crossedGoal = prevDocs < DAILY_GOAL && newDocs >= DAILY_GOAL;
+      const crossedMax = prevDocs < DAILY_MAX && newDocs >= DAILY_MAX;
+
+      if (crossedGoal) triggerCelebration("goal", stu.name);
+      if (crossedMax) triggerCelebration("max", stu.name);
+
+      saveState(appState);
+      updateCardVisuals(studentId);
+    }
+
+    /***********************
+     * CELEBRATIONS        *
+     ***********************/
+    const celebrationEl = document.getElementById("celebration");
+    const celebrationTitle = document.getElementById("celebration-title");
+    const celebrationSub = document.getElementById("celebration-sub");
+
+    function triggerCelebration(type, name, streakCount) {
+      let title = "";
+      let sub = "";
+      let confettiEmojis = [];
+
+      if (type === "session") {
+        const messages = [
+          "Nice batch!",
+          "Session complete!",
+          "Another 500 down!",
+          "Batch beast!"
+        ];
+        const intensifiers = [
+          "",
+          "Double session!",
+          "Triple threat!",
+          "Four in a row! 🔥",
+          "You’re on fire! 🔥🔥",
+          "Download machine! 🤖"
+        ];
+        const idx = Math.min(streakCount || 1, intensifiers.length - 1);
+        title = `${name}: ${intensifiers[idx] || messages[idx % messages.length]}`;
+        sub = `You just completed ${SESSION_SIZE} more articles. Total sessions today: ${streakCount || "?"}.`;
+        confettiEmojis = ["✨", "📄", "⚡️", "💾"];
+      } else if (type === "goal") {
+        title = `${name} hit the daily goal! 🏆`;
+        sub = `🎯 ${DAILY_GOAL.toLocaleString()} articles downloaded today.`;
+        confettiEmojis = ["🏆", "🎉", "📚", "🚀"];
+      } else if (type === "max") {
+        title = `${name} maxed out the system! 🌟`;
+        sub = `Legend status: ${DAILY_MAX.toLocaleString()} articles in a single day.`;
+        confettiEmojis = ["🌟", "🤯", "🔥", "🎊"];
+      }
+
+      celebrationTitle.textContent = title;
+      celebrationSub.textContent = sub;
+
+      // Clear old confetti
+      const old = celebrationEl.querySelectorAll(".confetti");
+      old.forEach(el => el.remove());
+
+      // Add a few confetti bits
+      for (let i = 0; i < 12; i++) {
+        const span = document.createElement("span");
+        span.className = "confetti";
+        span.textContent = confettiEmojis[i % confettiEmojis.length];
+        const angle = (Math.random() - 0.5) * 80; // spread
+        const x = (Math.random() - 0.5) * 120;
+        span.style.left = 50 + x / 3 + "%";
+        span.style.top = "10%";
+        span.style.transform = `translateX(${x}px) rotate(${angle}deg)`;
+        celebrationEl.querySelector(".celebration-box").appendChild(span);
+      }
+
+      celebrationEl.classList.add("visible");
+      setTimeout(() => {
+        celebrationEl.classList.remove("visible");
+      }, 1000);
+    }
+
+    /***********************
+     * INIT                *
+     ***********************/
+    function init() {
+      renderDate();
+      renderAll();
+
+      // Re-check date at midnight-ish to auto-reset if the tab stays open.
+      setInterval(() => {
+        const current = todayString();
+        if (current !== appState.lastSeenDate) {
+          appState = ensureState();
+          renderDate();
+          renderAll();
+        }
+      }, 60 * 1000); // check every minute
+    }
+
+    document.addEventListener("DOMContentLoaded", init);
+  </script>
+</body>
+</html>
