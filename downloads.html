@@ -1128,3 +1128,541 @@
   </script>
 </body>
 </html>
+
+  <script>
+    /***********************
+     * CONFIGURE STUDENTS  *
+     ***********************/
+    const initialStudents = [
+      { id: "aaron", name: "Aaron" },
+      { id: "gabby", name: "Gabby" },
+      { id: "hazel", name: "Hazel" },
+      { id: "josh", name: "Josh" },
+      { id: "paige", name: "Paige" },
+      { id: "joe", name: "Joe" }
+    ];
+
+    const DAILY_GOAL = 2000;
+    const DAILY_MAX = 2500;
+    const SESSION_SIZE = 500;
+    const WEEKLY_TARGET = 15000;
+    const LIFETIME_TARGET = 1000000;
+
+    // 🔑 BACKEND URL (Google Apps Script web app)
+    const API_URL = "https://script.google.com/macros/s/AKfycbyFUC9hNEyc6CSO56Birb0jfdKUeyISxNDMiouoaj8tAdzvFky0lk6DLP9W1VKNbaCf/exec";
+
+    // We keep one global state object mirrored from the backend:
+    let appState = null;
+
+    /***********************
+     * UTILITIES           *
+     ***********************/
+    function todayString() {
+      const d = new Date();
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, "0");
+      const dd = String(d.getDate()).padStart(2, "0");
+      return `${yyyy}-${mm}-${dd}`;
+    }
+
+    function formatNiceDate(dateStr) {
+      const d = new Date(dateStr);
+      if (Number.isNaN(d.getTime())) {
+        const parts = dateStr.split("-");
+        if (parts.length === 3) {
+          const [y,m,day] = parts.map(p => parseInt(p,10));
+          return new Date(y, m-1, day).toLocaleDateString(undefined, {
+            weekday: "short", month: "short", day: "numeric"
+          });
+        }
+        return dateStr;
+      }
+      return d.toLocaleDateString(undefined, {
+        weekday: "short",
+        month: "short",
+        day: "numeric"
+      });
+    }
+
+    function getWeekStart(dateObj) {
+      const d = new Date(dateObj.getTime());
+      const day = d.getDay(); // 0 = Sunday
+      d.setDate(d.getDate() - day);
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, "0");
+      const dd = String(d.getDate()).padStart(2, "0");
+      return `${yyyy}-${mm}-${dd}`;
+    }
+
+    async function fetchStateFromServer() {
+      try {
+        const res = await fetch(API_URL, { method: "GET" });
+        const text = await res.text();
+        if (!text) return null;
+        return JSON.parse(text);
+      } catch (e) {
+        console.warn("Could not fetch state from server:", e);
+        return null;
+      }
+    }
+
+    async function saveStateToServer(state) {
+      try {
+        await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(state)
+        });
+      } catch (e) {
+        console.warn("Could not save state to server:", e);
+      }
+    }
+
+    /***********************
+     * INITIALIZE STATE    *
+     ***********************/
+    async function ensureState() {
+      const today = todayString();
+      const todayDate = new Date(today);
+      let state = await fetchStateFromServer();
+
+      if (!state) {
+        // First-time initialization
+        state = {
+          lastSeenDate: today,
+          week: {
+            weekId: getWeekStart(todayDate),
+            docsThisWeek: 0
+          },
+          students: {}
+        };
+        initialStudents.forEach(s => {
+          state.students[s.id] = {
+            id: s.id,
+            name: s.name,
+            todayDocs: 0,
+            lifetimeDocs: 0,
+            daysHitGoal: 0,
+            daysHitMax: 0,
+            streakSessionsToday: 0,
+            lastDate: today
+          };
+        });
+        await saveStateToServer(state);
+        return state;
+      }
+
+      // Ensure week object exists
+      if (!state.week) {
+        state.week = {
+          weekId: getWeekStart(todayDate),
+          docsThisWeek: 0
+        };
+      }
+
+      // Ensure all configured students exist
+      initialStudents.forEach(s => {
+        if (!state.students) state.students = {};
+        if (!state.students[s.id]) {
+          state.students[s.id] = {
+            id: s.id,
+            name: s.name,
+            todayDocs: 0,
+            lifetimeDocs: 0,
+            daysHitGoal: 0,
+            daysHitMax: 0,
+            streakSessionsToday: 0,
+            lastDate: today
+          };
+        } else if (!state.students[s.id].name) {
+          state.students[s.id].name = s.name;
+        }
+      });
+
+      // Handle date change / daily reset on the shared state
+      const prevDate = state.lastSeenDate;
+      if (prevDate !== today) {
+        const prevDateObj = new Date(prevDate);
+        const prevWeekStart = getWeekStart(prevDateObj);
+        const currentWeekStart = getWeekStart(todayDate);
+
+        // Weekly logic
+        if (currentWeekStart === prevWeekStart && state.week.weekId === prevWeekStart) {
+          let sumPrevDocs = 0;
+          Object.values(state.students).forEach(stu => {
+            if (stu.lastDate === prevDate) {
+              sumPrevDocs += stu.todayDocs || 0;
+            }
+          });
+          state.week.docsThisWeek = (state.week.docsThisWeek || 0) + sumPrevDocs;
+        } else if (currentWeekStart !== prevWeekStart) {
+          state.week.weekId = currentWeekStart;
+          state.week.docsThisWeek = 0;
+        }
+
+        // Roll daily totals into lifetime & goal counters, then reset for new day
+        Object.values(state.students).forEach(stu => {
+          if (stu.lastDate === prevDate) {
+            const docs = stu.todayDocs || 0;
+            if (docs >= DAILY_GOAL) stu.daysHitGoal = (stu.daysHitGoal || 0) + 1;
+            if (docs >= DAILY_MAX) stu.daysHitMax = (stu.daysHitMax || 0) + 1;
+            stu.lifetimeDocs = (stu.lifetimeDocs || 0) + docs;
+          }
+          stu.todayDocs = 0;
+          stu.streakSessionsToday = 0;
+          stu.lastDate = today;
+        });
+
+        state.lastSeenDate = today;
+        await saveStateToServer(state);
+      }
+
+      return state;
+    }
+
+    /***********************
+     * RENDER UI           *
+     ***********************/
+    function renderDate() {
+      const el = document.getElementById("current-date");
+      el.textContent = `${formatNiceDate(todayString())}`;
+    }
+
+    function createCard(stu) {
+      const card = document.createElement("div");
+      card.className = "card";
+      card.dataset.studentId = stu.id;
+
+      card.innerHTML = `
+        <div class="card-header">
+          <div class="name">
+            <span>${stu.name}</span>
+            <span class="name-tag">${stu.id === "joe" ? "PI" : "RA"}</span>
+          </div>
+          <div class="daily-target">
+            Target: <strong>${DAILY_GOAL.toLocaleString()}</strong><br>
+            Max: <strong>${DAILY_MAX.toLocaleString()}</strong>
+          </div>
+        </div>
+        <div class="progress-row">
+          <div>Today: <strong><span class="today-docs">${stu.todayDocs}</span> / ${DAILY_MAX}</strong></div>
+          <div style="font-size:0.8rem;color:#9ca3af;">
+            Sessions: <span class="today-sessions">${Math.floor(stu.todayDocs / SESSION_SIZE)}</span>
+          </div>
+        </div>
+        <div class="progress-bar-container">
+          <div class="progress-bar"></div>
+        </div>
+        <div class="progress-labels">
+          <span>0</span>
+          <span>${DAILY_GOAL.toLocaleString()} (goal)</span>
+          <span>${DAILY_MAX.toLocaleString()} (max)</span>
+        </div>
+        <div class="buttons">
+          <button class="btn-main" data-inc="250">+250</button>
+          <button class="btn-go2500 disabled" data-go2500="true">
+            <span class="emoji">🚀</span>
+            <span class="label">Go for 2500</span>
+          </button>
+          <button class="btn-danger" data-dec="250">-250</button>
+        </div>
+        <div class="stats-row">
+          <span class="stat-pill">
+            🔁 Sessions today:
+            <span class="value today-sessions-pill">${Math.floor(stu.todayDocs / SESSION_SIZE)}</span>
+          </span>
+          <span class="stat-pill">
+            📚 Lifetime: <span class="value lifetime-docs">${stu.lifetimeDocs}</span>
+          </span>
+        </div>
+        <div class="achievements">
+          <span class="badge badge-goal ${stu.todayDocs >= DAILY_GOAL ? "on" : ""}">
+            🏆 <strong>${stu.daysHitGoal}</strong> days ≥ ${DAILY_GOAL}
+          </span>
+          <span class="badge badge-max ${stu.todayDocs >= DAILY_MAX ? "on" : ""}">
+            🌟 <strong>${stu.daysHitMax}</strong> days ≥ ${DAILY_MAX}
+          </span>
+        </div>
+      `;
+
+      const buttons = card.querySelectorAll("button");
+      buttons.forEach(btn => {
+        if (btn.dataset.inc) {
+          btn.addEventListener("click", () => changeDocs(stu.id, parseInt(btn.dataset.inc, 10)));
+        } else if (btn.dataset.dec) {
+          btn.addEventListener("click", () => changeDocs(stu.id, -parseInt(btn.dataset.dec, 10)));
+        } else if (btn.dataset.go2500) {
+          btn.addEventListener("click", () => handleGoFor2500(stu.id));
+        }
+      });
+
+      return card;
+    }
+
+    function renderAll() {
+      const container = document.getElementById("cards-container");
+      container.innerHTML = "";
+      Object.values(appState.students).forEach(stu => {
+        const card = createCard(stu);
+        container.appendChild(card);
+        updateCardVisuals(stu.id);
+      });
+      updateTeamTrackers();
+    }
+
+    function updateBarColor(barEl, docs) {
+      barEl.classList.remove("bar-red","bar-orange","bar-yellow","bar-greenish","bar-green-strong","bar-holo");
+
+      if (docs >= DAILY_MAX) {
+        barEl.classList.add("bar-holo");
+      } else if (docs >= 2000) {
+        barEl.classList.add("bar-green-strong");
+      } else if (docs >= 1500) {
+        barEl.classList.add("bar-greenish");
+      } else if (docs >= 1000) {
+        barEl.classList.add("bar-yellow");
+      } else if (docs >= 500) {
+        barEl.classList.add("bar-orange");
+      } else {
+        barEl.classList.add("bar-red");
+      }
+    }
+
+    function updateGo2500Button(card, docs) {
+      const btn = card.querySelector(".btn-go2500");
+      if (!btn) return;
+
+      if (docs < DAILY_GOAL) {
+        btn.classList.remove("enabled");
+        btn.classList.add("disabled");
+        btn.setAttribute("aria-disabled", "true");
+        const label = btn.querySelector(".label");
+        if (label) label.textContent = "Go for 2500";
+      } else if (docs >= DAILY_MAX) {
+        btn.classList.remove("enabled");
+        btn.classList.add("disabled");
+        btn.setAttribute("aria-disabled", "true");
+        const label = btn.querySelector(".label");
+        if (label) label.textContent = "Max achieved";
+      } else {
+        btn.classList.remove("disabled");
+        btn.classList.add("enabled");
+        btn.removeAttribute("aria-disabled");
+        const label = btn.querySelector(".label");
+        if (label) label.textContent = "Go for 2500";
+      }
+    }
+
+    function updateCardVisuals(studentId) {
+      const stu = appState.students[studentId];
+      const card = document.querySelector(`.card[data-student-id="${studentId}"]`);
+      if (!card) return;
+
+      const todayDocsEl = card.querySelector(".today-docs");
+      const todaySesEl = card.querySelector(".today-sessions");
+      const todaySesPill = card.querySelector(".today-sessions-pill");
+      const lifetimeEl = card.querySelector(".lifetime-docs");
+      const bar = card.querySelector(".progress-bar");
+      const badgeGoal = card.querySelector(".badge-goal");
+      const badgeMax = card.querySelector(".badge-max");
+
+      const sessions = Math.floor(stu.todayDocs / SESSION_SIZE);
+      const pct = Math.min(100, (stu.todayDocs / DAILY_MAX) * 100);
+
+      todayDocsEl.textContent = stu.todayDocs;
+      todaySesEl.textContent = sessions;
+      todaySesPill.textContent = sessions;
+      lifetimeEl.textContent = stu.lifetimeDocs;
+      bar.style.width = pct + "%";
+
+      updateBarColor(bar, stu.todayDocs);
+      updateGo2500Button(card, stu.todayDocs);
+
+      if (stu.todayDocs >= DAILY_GOAL) badgeGoal.classList.add("on");
+      else badgeGoal.classList.remove("on");
+
+      if (stu.todayDocs >= DAILY_MAX) badgeMax.classList.add("on");
+      else badgeMax.classList.remove("on");
+
+      if (stu.todayDocs >= DAILY_GOAL) card.classList.add("glow");
+      else card.classList.remove("glow");
+    }
+
+    /***********************
+     * TEAM TRACKERS       *
+     ***********************/
+    function updateTeamTrackers() {
+      const weeklyLabel = document.querySelector(".team-weekly-label");
+      const weeklyBar = document.querySelector(".team-weekly-bar");
+      const lifetimeLabel = document.querySelector(".team-lifetime-label");
+      const lifetimeBar = document.querySelector(".team-lifetime-bar");
+      if (!weeklyLabel || !weeklyBar || !lifetimeLabel || !lifetimeBar) return;
+
+      const weeklyDocs = appState.week ? (appState.week.docsThisWeek || 0) : 0;
+
+      let teamLifetime = 0;
+      Object.values(appState.students).forEach(stu => {
+        teamLifetime += (stu.lifetimeDocs || 0) + (stu.todayDocs || 0);
+      });
+
+      weeklyLabel.textContent = `${weeklyDocs.toLocaleString()} / ${WEEKLY_TARGET.toLocaleString()}`;
+      lifetimeLabel.textContent = `${teamLifetime.toLocaleString()} / ${LIFETIME_TARGET.toLocaleString()}`;
+
+      const weeklyPct = Math.min(100, (weeklyDocs / WEEKLY_TARGET) * 100);
+      const lifetimePct = Math.min(100, (teamLifetime / LIFETIME_TARGET) * 100);
+      weeklyBar.style.width = weeklyPct + "%";
+      lifetimeBar.style.width = lifetimePct + "%";
+
+      weeklyBar.classList.remove("bar-holo");
+      lifetimeBar.classList.remove("bar-holo");
+      if (weeklyDocs >= WEEKLY_TARGET) weeklyBar.classList.add("bar-holo");
+      if (teamLifetime >= LIFETIME_TARGET) lifetimeBar.classList.add("bar-holo");
+    }
+
+    /***********************
+     * STATE UPDATES       *
+     ***********************/
+    async function changeDocs(studentId, delta) {
+      if (!appState) return;
+      const stu = appState.students[studentId];
+      const prevDocs = stu.todayDocs;
+      let newDocs = prevDocs + delta;
+
+      if (newDocs < 0) newDocs = 0;
+      if (newDocs > DAILY_MAX) newDocs = DAILY_MAX;
+
+      const effectiveDelta = newDocs - prevDocs;
+      stu.todayDocs = newDocs;
+
+      // Ensure week exists
+      if (!appState.week) {
+        const todayDate = new Date(todayString());
+        appState.week = {
+          weekId: getWeekStart(todayDate),
+          docsThisWeek: 0
+        };
+      }
+      appState.week.docsThisWeek = Math.max(
+        0,
+        (appState.week.docsThisWeek || 0) + effectiveDelta
+      );
+
+      const prevSessions = Math.floor(prevDocs / SESSION_SIZE);
+      const newSessions = Math.floor(newDocs / SESSION_SIZE);
+      if (newSessions > prevSessions && delta > 0) {
+        stu.streakSessionsToday = (stu.streakSessionsToday || 0) + (newSessions - prevSessions);
+        triggerCelebration("session", stu.name, stu.streakSessionsToday);
+      }
+
+      const crossedGoal = prevDocs < DAILY_GOAL && newDocs >= DAILY_GOAL;
+      const crossedMax = prevDocs < DAILY_MAX && newDocs >= DAILY_MAX;
+
+      if (crossedGoal) {
+        triggerCelebration("goal", stu.name);
+      }
+      if (crossedMax) {
+        triggerCelebration("max", stu.name);
+      }
+
+      await saveStateToServer(appState);
+      updateCardVisuals(studentId);
+      updateTeamTrackers();
+    }
+
+    function handleGoFor2500(studentId) {
+      if (!appState) return;
+      const stu = appState.students[studentId];
+      if (stu.todayDocs < DAILY_GOAL || stu.todayDocs >= DAILY_MAX) {
+        return;
+      }
+      triggerCelebration("go2500", stu.name);
+    }
+
+    /***********************
+     * CELEBRATIONS        *
+     ***********************/
+    const celebrationEl = document.getElementById("celebration");
+    const celebrationTitle = document.getElementById("celebration-title");
+    const celebrationSub = document.getElementById("celebration-sub");
+
+    function triggerCelebration(type, name, streakCount) {
+      let title = "";
+      let sub = "";
+      let confettiEmojis = [];
+
+      if (type === "session") {
+        const intensifiers = [
+          "Session complete!",
+          "Double session!",
+          "Triple threat!",
+          "Four in a row! 🔥",
+          "You’re on fire! 🔥🔥",
+          "Download machine! 🤖"
+        ];
+        const idx = Math.min((streakCount || 1) - 1, intensifiers.length - 1);
+        title = `${name}: ${intensifiers[idx]}`;
+        sub = `You just completed another ${SESSION_SIZE} articles. Total sessions today: ${streakCount || "?"}.`;
+        confettiEmojis = ["✨", "📄", "⚡️", "💾"];
+      } else if (type === "goal") {
+        title = `${name} hit the daily goal! 🏆`;
+        sub = `🎯 ${DAILY_GOAL.toLocaleString()} articles downloaded today.`;
+        confettiEmojis = ["🏆", "🎉", "📚", "🚀"];
+      } else if (type === "max") {
+        title = `${name} maxed out the system! 🌟`;
+        sub = `Legend status: ${DAILY_MAX.toLocaleString()} articles in a single day.`;
+        confettiEmojis = ["🌟", "🤯", "🔥", "🎊"];
+      } else if (type === "go2500") {
+        title = `${name}, go for 2500! 🚀`;
+        sub = `You’ve hit the goal. One more push to ${DAILY_MAX.toLocaleString()} – you’ve got this.`;
+        confettiEmojis = ["🚀", "📈", "✨", "🔥"];
+      }
+
+      celebrationTitle.textContent = title;
+      celebrationSub.textContent = sub;
+
+      const old = celebrationEl.querySelectorAll(".confetti");
+      old.forEach(el => el.remove());
+
+      const totalConfetti = 40;
+      const overlayRect = celebrationEl.getBoundingClientRect();
+      for (let i = 0; i < totalConfetti; i++) {
+        const span = document.createElement("span");
+        span.className = "confetti";
+        span.textContent = confettiEmojis[i % confettiEmojis.length];
+
+        const startX = Math.random() * overlayRect.width;
+        const startY = Math.random() * 80 - 40;
+        span.style.left = `${startX}px`;
+        span.style.top = `${startY}px`;
+        span.style.animationDelay = (Math.random() * 0.5).toFixed(2) + "s";
+
+        celebrationEl.appendChild(span);
+      }
+
+      celebrationEl.classList.add("visible");
+      setTimeout(() => {
+        celebrationEl.classList.remove("visible");
+      }, 5000);
+    }
+
+    /***********************
+     * INIT                *
+     ***********************/
+    async function init() {
+      renderDate();
+      appState = await ensureState();
+      renderAll();
+
+      // Periodically re-sync from server so you see others' changes
+      setInterval(async () => {
+        const newState = await ensureState();
+        appState = newState;
+        renderDate();
+        renderAll();
+      }, 60 * 1000); // every minute
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      init();
+    });
+  </script>
