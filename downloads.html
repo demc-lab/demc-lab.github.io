@@ -2,22 +2,31 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Article Download Tracker</title>
+  <title>Daily Downloads Team - Progress Panel</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     :root {
-      --bg: #0f172a;
-      --card-bg: #111827;
-      --accent: #38bdf8;
-      --accent-soft: rgba(56,189,248,0.15);
-      --accent-strong: #22c55e;
-      --danger: #f97373;
-      --text-main: #e5e7eb;
-      --text-muted: #9ca3af;
-      --border-subtle: #1f2937;
+      /* UofSC palette */
+      --garnet: #73000a;
+      --black: #000000;
+      --white: #ffffff;
+      --gray-90: #363636;
+      --gray-70: #5C5C5C;
+      --gray-10: #ECECEC;
+
+      /* Semantic tokens */
+      --bg: #f8f5f5;
+      --bg-soft: #f3eeee;
+      --card-bg: #171717;
+      --accent: var(--garnet);
+      --accent-soft: rgba(115, 0, 10, 0.25);
+      --accent-strong: #00d084;
+      --text-main: #111827;
+      --text-muted: #4b5563;
+      --border-subtle: #d1d5db;
       --radius-lg: 16px;
       --radius-pill: 999px;
-      --shadow-soft: 0 20px 40px rgba(0,0,0,0.5);
+      --shadow-soft: 0 20px 40px rgba(0,0,0,0.2);
     }
 
     * {
@@ -28,7 +37,8 @@
     body {
       margin: 0;
       padding: 0;
-      background: radial-gradient(circle at top, #1e293b 0, #020617 50%, #000 100%);
+      background:
+        radial-gradient(circle at top left, #ffffff 0, #f9f5f5 40%, #f3eeee 80%, #ececec 100%);
       color: var(--text-main);
       min-height: 100vh;
     }
@@ -51,7 +61,9 @@
     .title-block h1 {
       margin: 0;
       font-size: 1.7rem;
-      letter-spacing: 0.03em;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--garnet);
     }
 
     .title-block p {
@@ -63,7 +75,7 @@
     .date-badge {
       padding: 6px 14px;
       border-radius: var(--radius-pill);
-      background: rgba(15,23,42,0.85);
+      background: rgba(255,255,255,0.9);
       border: 1px solid var(--border-subtle);
       font-size: 0.85rem;
       display: inline-flex;
@@ -72,7 +84,7 @@
     }
 
     .date-badge span:first-child {
-      color: var(--accent);
+      color: var(--garnet);
       font-size: 1rem;
     }
 
@@ -89,13 +101,14 @@
     }
 
     .card {
-      background: linear-gradient(145deg, rgba(15,23,42,0.95), rgba(15,23,42,0.8));
+      background: radial-gradient(circle at top, rgba(17,17,17,0.98), rgba(0,0,0,0.96));
       border-radius: var(--radius-lg);
-      border: 1px solid var(--border-subtle);
+      border: 1px solid #262626;
       padding: 16px 14px 14px;
       box-shadow: var(--shadow-soft);
       position: relative;
       overflow: hidden;
+      color: #f9fafb;
     }
 
     .card-header {
@@ -118,18 +131,19 @@
       font-size: 0.7rem;
       padding: 2px 6px;
       border-radius: var(--radius-pill);
-      border: 1px solid rgba(148,163,184,0.4);
-      color: var(--text-muted);
+      border: 1px solid rgba(188,188,188,0.6);
+      color: var(--gray-10);
+      background: rgba(54,54,54,0.6);
     }
 
     .daily-target {
       font-size: 0.75rem;
-      color: var(--text-muted);
+      color: #9ca3af;
       text-align: right;
     }
 
     .daily-target strong {
-      color: var(--accent);
+      color: #f97373;
     }
 
     .progress-row {
@@ -144,25 +158,59 @@
       width: 100%;
       height: 8px;
       border-radius: var(--radius-pill);
-      background: #020617;
+      background: #000000;
       overflow: hidden;
       margin-bottom: 6px;
-      border: 1px solid #1f2937;
+      border: 1px solid #262626;
     }
 
     .progress-bar {
       height: 100%;
       width: 0;
       border-radius: var(--radius-pill);
-      background: linear-gradient(90deg, var(--accent), var(--accent-strong));
-      transition: width 0.25s ease-out;
+      background: var(--garnet);
+      transition: width 0.25s ease-out, background 0.25s ease-out, box-shadow 0.25s ease-out;
+    }
+
+    /* Color states for the per-person bar */
+    .bar-red {
+      background: linear-gradient(90deg, #73000a, #b91c1c);
+      box-shadow: 0 0 8px rgba(115,0,10,0.6);
+    }
+    .bar-orange {
+      background: linear-gradient(90deg, #ea580c, #f97316);
+      box-shadow: 0 0 10px rgba(234,88,12,0.7);
+    }
+    .bar-yellow {
+      background: linear-gradient(90deg, #eab308, #facc15);
+      box-shadow: 0 0 10px rgba(234,179,8,0.7);
+    }
+    .bar-greenish {
+      background: linear-gradient(90deg, #16a34a, #22c55e);
+      box-shadow: 0 0 12px rgba(34,197,94,0.8);
+    }
+    .bar-green-strong {
+      background: linear-gradient(90deg, #16a34a, #4ade80);
+      box-shadow: 0 0 16px rgba(74,222,128,0.9);
+    }
+    .bar-holo {
+      background: linear-gradient(120deg, #f97316, #eab308, #22c55e, #0ea5e9, #a855f7, #f97316);
+      background-size: 300% 300%;
+      animation: holoGlow 2s linear infinite;
+      box-shadow: 0 0 20px rgba(250,250,250,0.85);
+    }
+
+    @keyframes holoGlow {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
     }
 
     .progress-labels {
       display: flex;
       justify-content: space-between;
       font-size: 0.7rem;
-      color: var(--text-muted);
+      color: #9ca3af;
       margin-bottom: 10px;
     }
 
@@ -183,7 +231,11 @@
       display: inline-flex;
       align-items: center;
       gap: 4px;
-      transition: transform 0.08s ease-out, box-shadow 0.08s ease-out, background 0.2s;
+      transition:
+        transform 0.08s ease-out,
+        box-shadow 0.08s ease-out,
+        background 0.2s,
+        opacity 0.2s;
       white-space: nowrap;
     }
 
@@ -193,9 +245,10 @@
     }
 
     .btn-main {
-      background: radial-gradient(circle at top, var(--accent), #0ea5e9);
-      color: #0b1120;
-      box-shadow: 0 10px 18px rgba(56,189,248,0.35);
+      background: radial-gradient(circle at top, #73000a, #ba1b27);
+      color: #fef2f2;
+      box-shadow: 0 10px 18px rgba(115,0,10,0.5);
+      border: 1px solid rgba(220,38,38,0.5);
     }
 
     .btn-main:hover {
@@ -203,23 +256,51 @@
     }
 
     .btn-secondary {
-      background: rgba(15,23,42,0.9);
-      color: var(--text-main);
-      border: 1px solid var(--border-subtle);
+      background: rgba(24,24,24,0.96);
+      color: #f9fafb;
+      border: 1px solid #4b5563;
     }
 
     .btn-secondary:hover {
-      background: rgba(15,23,42,1);
+      background: rgba(32,32,32,1);
     }
 
     .btn-danger {
-      background: rgba(127,29,29,0.9);
+      background: rgba(82,0,0,0.95);
       color: #fee2e2;
-      border: 1px solid rgba(248,113,113,0.5);
+      border: 1px solid rgba(248,113,113,0.7);
     }
 
     .btn-danger:hover {
       background: rgba(127,29,29,1);
+    }
+
+    /* Go for 2500 button */
+    .btn-go2500 {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-go2500.disabled {
+      background: #202020;
+      color: #9ca3af;
+      border: 1px solid #333333;
+      opacity: 0.6;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .btn-go2500.enabled {
+      background: linear-gradient(120deg, #f97316, #eab308, #22c55e, #0ea5e9, #a855f7, #f97316);
+      background-size: 300% 300%;
+      color: #050816;
+      border: 1px solid #ffffff;
+      animation: holoGlow 2s linear infinite;
+      box-shadow: 0 0 18px rgba(255,255,255,0.7);
+    }
+
+    .btn-go2500.enabled span.emoji {
+      filter: drop-shadow(0 0 4px rgba(255,255,255,0.9));
     }
 
     .stats-row {
@@ -234,16 +315,16 @@
     .stat-pill {
       padding: 4px 8px;
       border-radius: var(--radius-pill);
-      background: rgba(15,23,42,0.9);
-      border: 1px solid var(--border-subtle);
-      color: var(--text-muted);
+      background: rgba(24,24,24,0.95);
+      border: 1px solid #374151;
+      color: #d1d5db;
       display: inline-flex;
       align-items: center;
       gap: 4px;
     }
 
     .stat-pill span.value {
-      color: var(--accent);
+      color: #e5e7eb;
       font-weight: 500;
     }
 
@@ -259,15 +340,16 @@
       padding: 3px 8px;
       border-radius: var(--radius-pill);
       border: 1px solid rgba(55,65,81,0.8);
-      color: var(--text-muted);
+      color: #9ca3af;
       display: inline-flex;
       align-items: center;
       gap: 4px;
+      background: rgba(15,15,15,0.96);
     }
 
     .badge.on {
       border-color: rgba(34,197,94,0.9);
-      background: rgba(22,163,74,0.12);
+      background: rgba(22,163,74,0.18);
       color: #bbf7d0;
     }
 
@@ -280,7 +362,8 @@
       position: absolute;
       inset: -40%;
       opacity: 0;
-      background: radial-gradient(circle at top left, rgba(56,189,248,0.12), transparent 60%);
+      background:
+        radial-gradient(circle at top left, rgba(115,0,10,0.2), transparent 60%);
       pointer-events: none;
       transition: opacity 0.3s ease-out;
     }
@@ -289,7 +372,68 @@
       opacity: 1;
     }
 
-    /* Celebration overlay */
+    /* Team trackers (bottom) */
+    .team-trackers {
+      margin-top: 32px;
+      padding: 16px 14px;
+      border-radius: var(--radius-lg);
+      background: rgba(255,255,255,0.9);
+      border: 1px solid var(--border-subtle);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+    }
+
+    .team-tracker {
+      margin-bottom: 14px;
+    }
+
+    .team-tracker:last-child {
+      margin-bottom: 0;
+    }
+
+    .team-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .team-header span.label {
+      font-weight: 600;
+      color: var(--garnet);
+    }
+
+    .team-header span.value {
+      font-weight: 500;
+      color: #111827;
+    }
+
+    .team-progress-container {
+      width: 100%;
+      height: 12px;
+      border-radius: var(--radius-pill);
+      background: #e5e7eb;
+      overflow: hidden;
+      border: 1px solid #d1d5db;
+    }
+
+    .team-progress-bar {
+      height: 100%;
+      width: 0;
+      border-radius: var(--radius-pill);
+      background: linear-gradient(90deg, #73000a, #ba1b27);
+      transition: width 0.25s ease-out, background 0.25s ease-out, box-shadow 0.25s ease-out;
+    }
+
+    footer {
+      margin-top: 18px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    /* Celebration overlay now fills page with confetti everywhere */
     .celebration-overlay {
       position: fixed;
       inset: 0;
@@ -300,6 +444,7 @@
       z-index: 50;
       opacity: 0;
       transition: opacity 0.15s ease-out;
+      background: radial-gradient(circle at center, rgba(0,0,0,0.7), rgba(0,0,0,0.9));
     }
 
     .celebration-overlay.visible {
@@ -307,16 +452,17 @@
     }
 
     .celebration-box {
-      background: rgba(15,23,42,0.96);
+      background: rgba(17,17,17,0.96);
       border-radius: 20px;
-      border: 1px solid rgba(56,189,248,0.6);
+      border: 1px solid rgba(250,250,250,0.6);
       padding: 14px 20px;
       text-align: center;
-      min-width: 240px;
-      max-width: 320px;
-      box-shadow: 0 24px 60px rgba(0,0,0,0.8);
+      min-width: 260px;
+      max-width: 340px;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.95);
       position: relative;
-      overflow: hidden;
+      z-index: 2;
+      color: #f9fafb;
     }
 
     .celebration-title {
@@ -326,34 +472,28 @@
 
     .celebration-sub {
       font-size: 0.8rem;
-      color: var(--text-muted);
+      color: #d1d5db;
     }
 
     .confetti {
       position: absolute;
       font-size: 1.2rem;
-      animation: confetti-fall 0.9s linear forwards;
+      animation: confetti-fall 5s linear forwards;
+      z-index: 1;
     }
 
     @keyframes confetti-fall {
       0% {
         opacity: 0;
-        transform: translateY(-60px) translateX(0) rotate(0deg) scale(0.7);
+        transform: translateY(-80px) translateX(0) rotate(0deg) scale(0.7);
       }
-      15% {
+      10% {
         opacity: 1;
       }
       100% {
         opacity: 0;
-        transform: translateY(60px) translateX(40px) rotate(220deg) scale(1);
+        transform: translateY(120vh) translateX(60px) rotate(260deg) scale(1);
       }
-    }
-
-    footer {
-      margin-top: 26px;
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      text-align: center;
     }
   </style>
 </head>
@@ -361,8 +501,8 @@
   <div class="page">
     <header>
       <div class="title-block">
-        <h1>Article Download Quest</h1>
-        <p>Log your batches, hit your daily goals, and watch the team’s progress.</p>
+        <h1>Daily Downloads Team - Progress Panel</h1>
+        <p>Log your Download Progress and Hit Your Goals Each Day.</p>
       </div>
       <div>
         <div class="date-badge">
@@ -373,16 +513,37 @@
     </header>
 
     <p class="hint">
-      Each button updates only this browser (data is stored locally). Daily counts reset at midnight, but your cumulative stats persist.
+      Each button updates only this browser (stats are stored locally). Daily counts reset at midnight, but lifetime stats persist.
     </p>
 
     <div class="grid" id="cards-container">
       <!-- Cards injected by JS -->
     </div>
 
+    <div class="team-trackers">
+      <div class="team-tracker">
+        <div class="team-header">
+          <span class="label">Team Weekly Progress (resets Sunday 12:00am)</span>
+          <span class="value team-weekly-label">0 / 15,000</span>
+        </div>
+        <div class="team-progress-container">
+          <div class="team-progress-bar team-weekly-bar"></div>
+        </div>
+      </div>
+      <div class="team-tracker">
+        <div class="team-header">
+          <span class="label">Team Lifetime Progress (toward 1,000,000 downloads)</span>
+          <span class="value team-lifetime-label">0 / 1,000,000</span>
+        </div>
+        <div class="team-progress-container">
+          <div class="team-progress-bar team-lifetime-bar"></div>
+        </div>
+      </div>
+    </div>
+
     <footer>
-      Tip: Have students keep this tab open and tap <strong>+250</strong> or <strong>+500</strong> as they complete batches.
-      The page will auto-reset daily while keeping lifetime stats.
+      Tip: Keep this tab open and tap <strong>+250</strong> as you complete batches.
+      Hit <strong>2000</strong> to unlock the <strong>“Go for 2500”</strong> booster.
     </footer>
   </div>
 
@@ -399,18 +560,20 @@
      * CONFIGURE STUDENTS  *
      ***********************/
     const initialStudents = [
-      { id: "student1", name: "Student 1" },
-      { id: "student2", name: "Student 2" },
-      { id: "student3", name: "Student 3" },
-      { id: "student4", name: "Student 4" },
-      { id: "student5", name: "Student 5" },
-      { id: "instructor", name: "You (Instructor)" }
+      { id: "aaron", name: "Aaron" },
+      { id: "gabby", name: "Gabby" },
+      { id: "hazel", name: "Hazel" },
+      { id: "josh", name: "Josh" },
+      { id: "paige", name: "Paige" },
+      { id: "joe", name: "Joe" }
     ];
 
     const DAILY_GOAL = 2000;
     const DAILY_MAX = 2500;
     const SESSION_SIZE = 500;
-    const STORAGE_KEY = "download_tracker_v1";
+    const WEEKLY_TARGET = 15000;
+    const LIFETIME_TARGET = 1000000;
+    const STORAGE_KEY = "download_tracker_v3_uofsc";
 
     /***********************
      * UTILITIES           *
@@ -442,6 +605,16 @@
       });
     }
 
+    function getWeekStart(dateObj) {
+      const d = new Date(dateObj.getTime());
+      const day = d.getDay(); // 0 = Sunday
+      d.setDate(d.getDate() - day);
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, "0");
+      const dd = String(d.getDate()).padStart(2, "0");
+      return `${yyyy}-${mm}-${dd}`;
+    }
+
     function loadState() {
       try {
         const raw = localStorage.getItem(STORAGE_KEY);
@@ -469,8 +642,13 @@
       let state = loadState();
 
       if (!state) {
+        const todayDate = new Date(today);
         state = {
           lastSeenDate: today,
+          week: {
+            weekId: getWeekStart(todayDate),
+            docsThisWeek: 0
+          },
           students: {}
         };
         initialStudents.forEach(s => {
@@ -487,6 +665,16 @@
         });
         saveState(state);
         return state;
+      }
+
+      // Ensure week object exists
+      const todayDate = new Date(today);
+      const currentWeekStart = getWeekStart(todayDate);
+      if (!state.week) {
+        state.week = {
+          weekId: currentWeekStart,
+          docsThisWeek: 0
+        };
       }
 
       // Ensure all configured students exist
@@ -510,7 +698,26 @@
       // Handle date change / daily reset
       const prevDate = state.lastSeenDate;
       if (prevDate !== today) {
-        // For each student, roll yesterday into cumulative stats
+        const prevDateObj = new Date(prevDate);
+        const prevWeekStart = getWeekStart(prevDateObj);
+
+        // Week handling:
+        if (currentWeekStart === prevWeekStart && state.week.weekId === prevWeekStart) {
+          // Same week: add yesterday's docs into this week's total
+          let sumPrevDocs = 0;
+          Object.values(state.students).forEach(stu => {
+            if (stu.lastDate === prevDate) {
+              sumPrevDocs += stu.todayDocs || 0;
+            }
+          });
+          state.week.docsThisWeek = (state.week.docsThisWeek || 0) + sumPrevDocs;
+        } else if (currentWeekStart !== prevWeekStart) {
+          // New week: reset weekly docs
+          state.week.weekId = currentWeekStart;
+          state.week.docsThisWeek = 0;
+        }
+
+        // Roll daily totals into per-student lifetime & goal counters, then reset for new day
         Object.values(state.students).forEach(stu => {
           if (stu.lastDate === prevDate) {
             const docs = stu.todayDocs || 0;
@@ -518,11 +725,11 @@
             if (docs >= DAILY_MAX) stu.daysHitMax = (stu.daysHitMax || 0) + 1;
             stu.lifetimeDocs = (stu.lifetimeDocs || 0) + docs;
           }
-          // Reset daily stats
           stu.todayDocs = 0;
           stu.streakSessionsToday = 0;
           stu.lastDate = today;
         });
+
         state.lastSeenDate = today;
         saveState(state);
       }
@@ -549,7 +756,7 @@
         <div class="card-header">
           <div class="name">
             <span>${stu.name}</span>
-            <span class="name-tag">${stu.id === "instructor" ? "Lead" : "RA"}</span>
+            <span class="name-tag">${stu.id === "joe" ? "PI" : "RA"}</span>
           </div>
           <div class="daily-target">
             Target: <strong>${DAILY_GOAL.toLocaleString()}</strong><br>
@@ -558,7 +765,7 @@
         </div>
         <div class="progress-row">
           <div>Today: <strong><span class="today-docs">${stu.todayDocs}</span> / ${DAILY_MAX}</strong></div>
-          <div style="font-size:0.8rem;color:var(--text-muted);">
+          <div style="font-size:0.8rem;color:#9ca3af;">
             Sessions: <span class="today-sessions">${Math.floor(stu.todayDocs / SESSION_SIZE)}</span>
           </div>
         </div>
@@ -572,8 +779,10 @@
         </div>
         <div class="buttons">
           <button class="btn-main" data-inc="250">+250</button>
-          <button class="btn-main" data-inc="500">+500</button>
-          <button class="btn-secondary" data-setgoal="${DAILY_GOAL}">Set to ${DAILY_GOAL}</button>
+          <button class="btn-go2500 disabled" data-go2500="true">
+            <span class="emoji">🚀</span>
+            <span class="label">Go for 2500</span>
+          </button>
           <button class="btn-danger" data-dec="250">-250</button>
         </div>
         <div class="stats-row">
@@ -595,15 +804,14 @@
         </div>
       `;
 
-      // Attach button handlers
       const buttons = card.querySelectorAll("button");
       buttons.forEach(btn => {
         if (btn.dataset.inc) {
           btn.addEventListener("click", () => changeDocs(stu.id, parseInt(btn.dataset.inc, 10)));
         } else if (btn.dataset.dec) {
           btn.addEventListener("click", () => changeDocs(stu.id, -parseInt(btn.dataset.dec, 10)));
-        } else if (btn.dataset.setgoal) {
-          btn.addEventListener("click", () => setDocsToGoal(stu.id, parseInt(btn.dataset.setgoal, 10)));
+        } else if (btn.dataset.go2500) {
+          btn.addEventListener("click", () => handleGoFor2500(stu.id));
         }
       });
 
@@ -618,6 +826,50 @@
         container.appendChild(card);
         updateCardVisuals(stu.id);
       });
+      updateTeamTrackers();
+    }
+
+    function updateBarColor(barEl, docs) {
+      barEl.classList.remove("bar-red","bar-orange","bar-yellow","bar-greenish","bar-green-strong","bar-holo");
+
+      if (docs >= DAILY_MAX) {
+        barEl.classList.add("bar-holo");
+      } else if (docs >= 2000) {
+        barEl.classList.add("bar-green-strong");
+      } else if (docs >= 1500) {
+        barEl.classList.add("bar-greenish");
+      } else if (docs >= 1000) {
+        barEl.classList.add("bar-yellow");
+      } else if (docs >= 500) {
+        barEl.classList.add("bar-orange");
+      } else {
+        barEl.classList.add("bar-red");
+      }
+    }
+
+    function updateGo2500Button(card, docs) {
+      const btn = card.querySelector(".btn-go2500");
+      if (!btn) return;
+
+      if (docs < DAILY_GOAL) {
+        btn.classList.remove("enabled");
+        btn.classList.add("disabled");
+        btn.setAttribute("aria-disabled", "true");
+        const label = btn.querySelector(".label");
+        if (label) label.textContent = "Go for 2500";
+      } else if (docs >= DAILY_MAX) {
+        btn.classList.remove("enabled");
+        btn.classList.add("disabled");
+        btn.setAttribute("aria-disabled", "true");
+        const label = btn.querySelector(".label");
+        if (label) label.textContent = "Max achieved";
+      } else {
+        btn.classList.remove("disabled");
+        btn.classList.add("enabled");
+        btn.removeAttribute("aria-disabled");
+        const label = btn.querySelector(".label");
+        if (label) label.textContent = "Go for 2500";
+      }
     }
 
     function updateCardVisuals(studentId) {
@@ -642,16 +894,48 @@
       lifetimeEl.textContent = stu.lifetimeDocs;
       bar.style.width = pct + "%";
 
-      // Achievements
+      updateBarColor(bar, stu.todayDocs);
+      updateGo2500Button(card, stu.todayDocs);
+
       if (stu.todayDocs >= DAILY_GOAL) badgeGoal.classList.add("on");
       else badgeGoal.classList.remove("on");
 
       if (stu.todayDocs >= DAILY_MAX) badgeMax.classList.add("on");
       else badgeMax.classList.remove("on");
 
-      // Glow effect when near/above goal
       if (stu.todayDocs >= DAILY_GOAL) card.classList.add("glow");
       else card.classList.remove("glow");
+    }
+
+    /***********************
+     * TEAM TRACKERS       *
+     ***********************/
+    function updateTeamTrackers() {
+      const weeklyLabel = document.querySelector(".team-weekly-label");
+      const weeklyBar = document.querySelector(".team-weekly-bar");
+      const lifetimeLabel = document.querySelector(".team-lifetime-label");
+      const lifetimeBar = document.querySelector(".team-lifetime-bar");
+      if (!weeklyLabel || !weeklyBar || !lifetimeLabel || !lifetimeBar) return;
+
+      const weeklyDocs = appState.week ? (appState.week.docsThisWeek || 0) : 0;
+
+      let teamLifetime = 0;
+      Object.values(appState.students).forEach(stu => {
+        teamLifetime += (stu.lifetimeDocs || 0) + (stu.todayDocs || 0);
+      });
+
+      weeklyLabel.textContent = `${weeklyDocs.toLocaleString()} / ${WEEKLY_TARGET.toLocaleString()}`;
+      lifetimeLabel.textContent = `${teamLifetime.toLocaleString()} / ${LIFETIME_TARGET.toLocaleString()}`;
+
+      const weeklyPct = Math.min(100, (weeklyDocs / WEEKLY_TARGET) * 100);
+      const lifetimePct = Math.min(100, (teamLifetime / LIFETIME_TARGET) * 100);
+      weeklyBar.style.width = weeklyPct + "%";
+      lifetimeBar.style.width = lifetimePct + "%";
+
+      weeklyBar.classList.remove("bar-holo");
+      lifetimeBar.classList.remove("bar-holo");
+      if (weeklyDocs >= WEEKLY_TARGET) weeklyBar.classList.add("bar-holo");
+      if (teamLifetime >= LIFETIME_TARGET) lifetimeBar.classList.add("bar-holo");
     }
 
     /***********************
@@ -665,9 +949,22 @@
       if (newDocs < 0) newDocs = 0;
       if (newDocs > DAILY_MAX) newDocs = DAILY_MAX;
 
+      const effectiveDelta = newDocs - prevDocs;
       stu.todayDocs = newDocs;
 
-      // Track streak: only based on 500-doc session completions in this day
+      // Initialize week if needed
+      if (!appState.week) {
+        const todayDate = new Date(todayString());
+        appState.week = {
+          weekId: getWeekStart(todayDate),
+          docsThisWeek: 0
+        };
+      }
+      appState.week.docsThisWeek = Math.max(
+        0,
+        (appState.week.docsThisWeek || 0) + effectiveDelta
+      );
+
       const prevSessions = Math.floor(prevDocs / SESSION_SIZE);
       const newSessions = Math.floor(newDocs / SESSION_SIZE);
       if (newSessions > prevSessions && delta > 0) {
@@ -675,7 +972,6 @@
         triggerCelebration("session", stu.name, stu.streakSessionsToday);
       }
 
-      // Goal achievements
       const crossedGoal = prevDocs < DAILY_GOAL && newDocs >= DAILY_GOAL;
       const crossedMax = prevDocs < DAILY_MAX && newDocs >= DAILY_MAX;
 
@@ -688,33 +984,15 @@
 
       saveState(appState);
       updateCardVisuals(studentId);
+      updateTeamTrackers();
     }
 
-    function setDocsToGoal(studentId, goal) {
+    function handleGoFor2500(studentId) {
       const stu = appState.students[studentId];
-      const prevDocs = stu.todayDocs;
-      let newDocs = goal;
-      if (newDocs > DAILY_MAX) newDocs = DAILY_MAX;
-      if (newDocs < 0) newDocs = 0;
-      stu.todayDocs = newDocs;
-
-      // Streak adjustment if we jumped over sessions
-      const prevSessions = Math.floor(prevDocs / SESSION_SIZE);
-      const newSessions = Math.floor(newDocs / SESSION_SIZE);
-      if (newSessions > prevSessions) {
-        const additional = newSessions - prevSessions;
-        stu.streakSessionsToday = (stu.streakSessionsToday || 0) + additional;
-        triggerCelebration("session", stu.name, stu.streakSessionsToday);
+      if (stu.todayDocs < DAILY_GOAL || stu.todayDocs >= DAILY_MAX) {
+        return;
       }
-
-      const crossedGoal = prevDocs < DAILY_GOAL && newDocs >= DAILY_GOAL;
-      const crossedMax = prevDocs < DAILY_MAX && newDocs >= DAILY_MAX;
-
-      if (crossedGoal) triggerCelebration("goal", stu.name);
-      if (crossedMax) triggerCelebration("max", stu.name);
-
-      saveState(appState);
-      updateCardVisuals(studentId);
+      triggerCelebration("go2500", stu.name);
     }
 
     /***********************
@@ -730,23 +1008,17 @@
       let confettiEmojis = [];
 
       if (type === "session") {
-        const messages = [
-          "Nice batch!",
-          "Session complete!",
-          "Another 500 down!",
-          "Batch beast!"
-        ];
         const intensifiers = [
-          "",
+          "Session complete!",
           "Double session!",
           "Triple threat!",
           "Four in a row! 🔥",
           "You’re on fire! 🔥🔥",
           "Download machine! 🤖"
         ];
-        const idx = Math.min(streakCount || 1, intensifiers.length - 1);
-        title = `${name}: ${intensifiers[idx] || messages[idx % messages.length]}`;
-        sub = `You just completed ${SESSION_SIZE} more articles. Total sessions today: ${streakCount || "?"}.`;
+        const idx = Math.min((streakCount || 1) - 1, intensifiers.length - 1);
+        title = `${name}: ${intensifiers[idx]}`;
+        sub = `You just completed another ${SESSION_SIZE} articles. Total sessions today: ${streakCount || "?"}.`;
         confettiEmojis = ["✨", "📄", "⚡️", "💾"];
       } else if (type === "goal") {
         title = `${name} hit the daily goal! 🏆`;
@@ -756,6 +1028,10 @@
         title = `${name} maxed out the system! 🌟`;
         sub = `Legend status: ${DAILY_MAX.toLocaleString()} articles in a single day.`;
         confettiEmojis = ["🌟", "🤯", "🔥", "🎊"];
+      } else if (type === "go2500") {
+        title = `${name}, go for 2500! 🚀`;
+        sub = `You’ve hit the goal. One more push to ${DAILY_MAX.toLocaleString()} – you’ve got this.`;
+        confettiEmojis = ["🚀", "📈", "✨", "🔥"];
       }
 
       celebrationTitle.textContent = title;
@@ -765,23 +1041,27 @@
       const old = celebrationEl.querySelectorAll(".confetti");
       old.forEach(el => el.remove());
 
-      // Add a few confetti bits
-      for (let i = 0; i < 12; i++) {
+      // Full-page confetti: sprinkle across viewport
+      const totalConfetti = 40;
+      const overlayRect = celebrationEl.getBoundingClientRect();
+      for (let i = 0; i < totalConfetti; i++) {
         const span = document.createElement("span");
         span.className = "confetti";
         span.textContent = confettiEmojis[i % confettiEmojis.length];
-        const angle = (Math.random() - 0.5) * 80; // spread
-        const x = (Math.random() - 0.5) * 120;
-        span.style.left = 50 + x / 3 + "%";
-        span.style.top = "10%";
-        span.style.transform = `translateX(${x}px) rotate(${angle}deg)`;
-        celebrationEl.querySelector(".celebration-box").appendChild(span);
+
+        const startX = Math.random() * overlayRect.width;
+        const startY = Math.random() * 80 - 40; // slightly above viewport
+        span.style.left = `${startX}px`;
+        span.style.top = `${startY}px`;
+        span.style.animationDelay = (Math.random() * 0.5).toFixed(2) + "s";
+
+        celebrationEl.appendChild(span);
       }
 
       celebrationEl.classList.add("visible");
       setTimeout(() => {
         celebrationEl.classList.remove("visible");
-      }, 1000);
+      }, 5000); // 5 seconds
     }
 
     /***********************
@@ -791,7 +1071,6 @@
       renderDate();
       renderAll();
 
-      // Re-check date at midnight-ish to auto-reset if the tab stays open.
       setInterval(() => {
         const current = todayString();
         if (current !== appState.lastSeenDate) {
@@ -799,7 +1078,7 @@
           renderDate();
           renderAll();
         }
-      }, 60 * 1000); // check every minute
+      }, 60 * 1000);
     }
 
     document.addEventListener("DOMContentLoaded", init);
