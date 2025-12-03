@@ -101,14 +101,14 @@
     }
 
     .card {
-      background: radial-gradient(circle at top, rgba(17,17,17,0.98), rgba(0,0,0,0.96));
+      background: linear-gradient(150deg, #73000a, #5c0008);
       border-radius: var(--radius-lg);
-      border: 1px solid #262626;
+      border: 1px solid #4a0005;
       padding: 16px 14px 14px;
-      box-shadow: var(--shadow-soft);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.35);
       position: relative;
       overflow: hidden;
-      color: #f9fafb;
+      color: #ffffff;
     }
 
     .card-header {
@@ -362,11 +362,10 @@
       position: absolute;
       inset: -40%;
       opacity: 0;
-      background:
-        radial-gradient(circle at top left, rgba(115,0,10,0.2), transparent 60%);
+      background: radial-gradient(circle at top left, rgba(255,255,255,0.25), transparent 60%);
       pointer-events: none;
       transition: opacity 0.3s ease-out;
-    }
+}
 
     .card.glow::before {
       opacity: 1;
