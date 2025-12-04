@@ -583,8 +583,17 @@
     <div class="team-trackers">
       <div class="team-tracker">
         <div class="team-header">
+          <span class="label">Team Daily Progress (resets at midnight)</span>
+          <span class="value team-daily-label">0 / 15,000</span>
+        </div>
+        <div class="team-progress-container">
+          <div class="team-progress-bar team-daily-bar"></div>
+        </div>
+      </div>
+      <div class="team-tracker">
+        <div class="team-header">
           <span class="label">Team Weekly Progress (resets Sunday 12:00am)</span>
-          <span class="value team-weekly-label">0 / 15,000</span>
+          <span class="value team-weekly-label">0 / 105,000</span>
         </div>
         <div class="team-progress-container">
           <div class="team-progress-bar team-weekly-bar"></div>
@@ -592,8 +601,8 @@
       </div>
       <div class="team-tracker">
         <div class="team-header">
-          <span class="label">Team Lifetime Progress (toward 1,000,000 downloads)</span>
-          <span class="value team-lifetime-label">0 / 1,000,000</span>
+          <span class="label">Team Lifetime Progress (toward 1,750,000 downloads)</span>
+          <span class="value team-lifetime-label">0 / 1,750,000</span>
         </div>
         <div class="team-progress-container">
           <div class="team-progress-bar team-lifetime-bar"></div>
@@ -630,8 +639,12 @@
     const DAILY_GOAL = 2000;
     const DAILY_MAX = 2500;
     const SESSION_SIZE = 500;
-    const WEEKLY_TARGET = 15000;
-    const LIFETIME_TARGET = 1000000;
+
+    // Team-level targets
+    const DAILY_TEAM_TARGET = 15000;      // 6 people × 2500 max
+    const WEEKLY_TARGET = 105000;         // 7 × 15,000
+    const LIFETIME_TARGET = 1750000;      // 1.75M total goal
+    const LIFETIME_OFFSET = 320000;       // already downloaded before tracker
 
     // 🔑 BACKEND URL (Google Apps Script web app)
     const API_URL = "https://script.google.com/macros/s/AKfycbyFUC9hNEyc6CSO56Birb0jfdKUeyISxNDMiouoaj8tAdzvFky0lk6DLP9W1VKNbaCf/exec";
@@ -771,16 +784,8 @@
         const prevWeekStart = getWeekStart(prevDateObj);
         const currentWeekStart = getWeekStart(todayDate);
 
-        // Weekly logic
-        if (currentWeekStart === prevWeekStart && state.week.weekId === prevWeekStart) {
-          let sumPrevDocs = 0;
-          Object.values(state.students).forEach(stu => {
-            if (stu.lastDate === prevDate) {
-              sumPrevDocs += stu.todayDocs || 0;
-            }
-          });
-          state.week.docsThisWeek = (state.week.docsThisWeek || 0) + sumPrevDocs;
-        } else if (currentWeekStart !== prevWeekStart) {
+        // Weekly logic: if a new week has started, reset the weekly counter
+        if (currentWeekStart !== prevWeekStart || state.week.weekId !== currentWeekStart) {
           state.week.weekId = currentWeekStart;
           state.week.docsThisWeek = 0;
         }
