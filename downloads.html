@@ -984,33 +984,59 @@
      * TEAM TRACKERS       *
      ***********************/
     function updateTeamTrackers() {
+      const dailyLabel = document.querySelector(".team-daily-label");
+      const dailyBar = document.querySelector(".team-daily-bar");
       const weeklyLabel = document.querySelector(".team-weekly-label");
       const weeklyBar = document.querySelector(".team-weekly-bar");
       const lifetimeLabel = document.querySelector(".team-lifetime-label");
       const lifetimeBar = document.querySelector(".team-lifetime-bar");
-      if (!weeklyLabel || !weeklyBar || !lifetimeLabel || !lifetimeBar) return;
 
+      if (!dailyLabel || !dailyBar || !weeklyLabel || !weeklyBar || !lifetimeLabel || !lifetimeBar) return;
+
+      // Team daily docs = sum of today's docs across students
+      let dailyDocs = 0;
+      Object.values(appState.students).forEach(stu => {
+        dailyDocs += (stu.todayDocs || 0);
+      });
+
+      // Weekly docs come from appState.week.docsThisWeek (incremented in changeDocs)
       const weeklyDocs = appState.week ? (appState.week.docsThisWeek || 0) : 0;
 
-      let teamLifetime = 0;
+      // Lifetime = offset + all lifetimeDocs + today's docs
+      let teamLifetime = LIFETIME_OFFSET;
       Object.values(appState.students).forEach(stu => {
         teamLifetime += (stu.lifetimeDocs || 0) + (stu.todayDocs || 0);
       });
 
+      // Update labels
+      dailyLabel.textContent = `${dailyDocs.toLocaleString()} / ${DAILY_TEAM_TARGET.toLocaleString()}`;
       weeklyLabel.textContent = `${weeklyDocs.toLocaleString()} / ${WEEKLY_TARGET.toLocaleString()}`;
       lifetimeLabel.textContent = `${teamLifetime.toLocaleString()} / ${LIFETIME_TARGET.toLocaleString()}`;
 
-      const weeklyPct = Math.min(100, (weeklyDocs / WEEKLY_TARGET) * 100);
-      const lifetimePct = Math.min(100, (teamLifetime / LIFETIME_TARGET) * 100);
+      // Percentages (with minimum visible width for non-zero)
+      const dailyPctRaw = (dailyDocs / DAILY_TEAM_TARGET) * 100;
+      const weeklyPctRaw = (weeklyDocs / WEEKLY_TARGET) * 100;
+      const lifetimePctRaw = (teamLifetime / LIFETIME_TARGET) * 100;
+
+      const dailyPct = dailyDocs > 0 ? Math.min(100, Math.max(4, dailyPctRaw)) : 0;
+      const weeklyPct = weeklyDocs > 0 ? Math.min(100, Math.max(4, weeklyPctRaw)) : 0;
+      const lifetimePct = teamLifetime > 0 ? Math.min(100, Math.max(4, lifetimePctRaw)) : 0;
+
+      dailyBar.style.width = dailyPct + "%";
       weeklyBar.style.width = weeklyPct + "%";
       lifetimeBar.style.width = lifetimePct + "%";
 
+      // Holographic "fully hit" state if they reach the target
+      dailyBar.classList.remove("bar-holo");
       weeklyBar.classList.remove("bar-holo");
       lifetimeBar.classList.remove("bar-holo");
+
+      if (dailyDocs >= DAILY_TEAM_TARGET) dailyBar.classList.add("bar-holo");
       if (weeklyDocs >= WEEKLY_TARGET) weeklyBar.classList.add("bar-holo");
       if (teamLifetime >= LIFETIME_TARGET) lifetimeBar.classList.add("bar-holo");
     }
 
+    
     /***********************
      * STATE UPDATES       *
      ***********************/
