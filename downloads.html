@@ -482,14 +482,13 @@
     }
 
     .celebration-sub {
-      font-size: 0.8rem;
-      color: #d1d5db;
+      display: none;
     }
 
     .confetti {
       position: absolute;
       font-size: 1.2rem;
-      animation: confetti-fall 5s linear forwards;
+      animation: confetti-fall 2.5s linear forwards;
       z-index: 1;
     }
 
@@ -509,26 +508,33 @@
 
     /* Add resource link aesthetics */
     .resource-links {
-      margin-top: 16px;
-      font-size: 0.8rem;
-      text-align: center;
+      margin: 12px 0 20px;
+      padding: 10px 12px;
+      border-radius: var(--radius-lg);
+      background: rgba(255,255,255,0.95);
+      border: 1px solid var(--border-subtle);
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      gap: 8px 16px;
+      gap: 8px 18px;
+      font-size: 0.85rem;
     }
 
     .resource-links a {
-      color: var(--garnet);
+      padding: 6px 12px;
+      border-radius: var(--radius-pill);
+      background: var(--garnet);
+      color: #ffffff;
       text-decoration: none;
       font-weight: 500;
-      border-bottom: 1px solid transparent;
-      padding-bottom: 1px;
+      border: 1px solid #4a0005;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
     }
 
     .resource-links a:hover {
-      border-bottom-color: var(--garnet);
+      filter: brightness(1.05);
     }
+    
   </style>
 </head>
 <body>
@@ -549,6 +555,26 @@
     <p class="hint">
       Hit 2,000 downloads a day - and push for 2,500. Email Joe if you run out of downloads and need a new assignment.
     </p>
+
+    <div class="resource-links">
+      <a href="https://docs.google.com/document/d/1dyApmwqCAarkQZimU1CVon85t1lV7U2Z/edit" target="_blank" rel="noopener noreferrer">
+        Download Instructions
+      </a>
+      <a href="https://guides.library.sc.edu/c.php?g=410318&p=2797667" target="_blank" rel="noopener noreferrer">
+        Link to LexisNexis
+      </a>
+      <a href="https://docs.google.com/spreadsheets/d/1HvGiz47HTLl6YYt78p3ynjxy_t47A5R_/edit?gid=1212352806#gid=1212352806"
+         target="_blank" rel="noopener noreferrer">
+        Download Assignments
+      </a>
+      <a href="https://drive.google.com/drive/folders/1LIPT75mm_4_53jGq3P-KkWPsqt9NIQ0S" target="_blank" rel="noopener noreferrer">
+        Articles Upload Folder
+      </a>
+      <a href="https://drive.google.com/drive/folders/1ZfXeOZY3cAxNaKIdix8WJS2TzlS7ik81" target="_blank" rel="noopener noreferrer">
+        Metadata Upload Folder (Josh)
+      </a>
+    </div>
+  </div>
 
     <div class="grid" id="cards-container">
       <!-- Cards injected by JS -->
@@ -579,26 +605,6 @@
       Tip: Keep this tab open and tap <strong>+250</strong> as you complete batches.
       Hit <strong>2000</strong> to unlock the <strong>“Go for 2500”</strong> booster.
     </footer>
-
-    <div class="resource-links">
-      <a href="https://docs.google.com/document/d/1dyApmwqCAarkQZimU1CVon85t1lV7U2Z/edit" target="_blank" rel="noopener noreferrer">
-        Download Instructions
-      </a>
-      <a href="https://guides.library.sc.edu/c.php?g=410318&p=2797667" target="_blank" rel="noopener noreferrer">
-        Link to LexisNexis
-      </a>
-      <a href="https://docs.google.com/spreadsheets/d/1HvGiz47HTLl6YYt78p3ynjxy_t47A5R_/edit?gid=1212352806#gid=1212352806"
-         target="_blank" rel="noopener noreferrer">
-        Download Assignments
-      </a>
-      <a href="https://drive.google.com/drive/folders/1LIPT75mm_4_53jGq3P-KkWPsqt9NIQ0S" target="_blank" rel="noopener noreferrer">
-        Articles Upload Folder
-      </a>
-      <a href="https://drive.google.com/drive/folders/1ZfXeOZY3cAxNaKIdix8WJS2TzlS7ik81" target="_blank" rel="noopener noreferrer">
-        Metadata Upload Folder (Josh)
-      </a>
-    </div>
-  </div>
 
   <!-- Celebration overlay -->
   <div class="celebration-overlay" id="celebration">
@@ -911,24 +917,26 @@
       const btn = card.querySelector(".btn-go2500");
       if (!btn) return;
 
+      const label = btn.querySelector(".label");
+
       if (docs < DAILY_GOAL) {
         btn.classList.remove("enabled");
         btn.classList.add("disabled");
         btn.setAttribute("aria-disabled", "true");
-        const label = btn.querySelector(".label");
-        if (label) label.textContent = "Go for 2500";
+        if (label) label.textContent = "Locked – reach 2000";
+        btn.title = "This unlocks once you log at least 2000 downloads today.";
       } else if (docs >= DAILY_MAX) {
         btn.classList.remove("enabled");
         btn.classList.add("disabled");
         btn.setAttribute("aria-disabled", "true");
-        const label = btn.querySelector(".label");
         if (label) label.textContent = "Max achieved";
+        btn.title = "You’ve already hit the 2500 max for today.";
       } else {
         btn.classList.remove("disabled");
         btn.classList.add("enabled");
         btn.removeAttribute("aria-disabled");
-        const label = btn.querySelector(".label");
-        if (label) label.textContent = "Go for 2500";
+        if (label) label.textContent = "Unlocked – push for 2500";
+        btn.title = "You’ve hit 2000 – click to celebrate your push to 2500.";
       }
     }
 
@@ -1097,7 +1105,7 @@
       }
 
       celebrationTitle.textContent = title;
-      celebrationSub.textContent = sub;
+      celebrationSub.textContent = "";
 
       const old = celebrationEl.querySelectorAll(".confetti");
       old.forEach(el => el.remove());
@@ -1121,7 +1129,7 @@
       celebrationEl.classList.add("visible");
       setTimeout(() => {
         celebrationEl.classList.remove("visible");
-      }, 5000);
+      }, 2500);
     }
 
     /***********************
