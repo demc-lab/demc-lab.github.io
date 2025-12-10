@@ -720,11 +720,11 @@
       renderDate(appState.today);
       renderAll();
     }
-
+    
 async function logDeltaToServer(studentId, delta) {
   try {
     const url = `${API_URL}?log=1&studentId=${encodeURIComponent(studentId)}&delta=${encodeURIComponent(delta)}`;
-    // Fire-and-forget GET; we don't care about the response body
+    // Fire-and-forget GET; aggregation uses plain GET without ?log=1
     fetch(url, { method: "GET" }).catch(err => {
       console.error("Error logging delta (fetch failed):", err);
     });
