@@ -622,7 +622,6 @@
       <div class="celebration-sub" id="celebration-sub"></div>
     </div>
   </div>
-
   <script>
     /***********************
      * CONFIGURE STUDENTS  *
@@ -640,16 +639,16 @@
     const DAILY_MAX = 2500;
     const SESSION_SIZE = 500;
 
-    const DAILY_TEAM_TARGET = 15000;       // 6 × 2500
-    const WEEKLY_TARGET = 105000;          // 7 × 15,000
-    const LIFETIME_TARGET = 1750000;       // for display
-    const LIFETIME_OFFSET = 320000;        // pre-tracker downloads
+    const DAILY_TEAM_TARGET = 15000;   // 6 × 2500
+    const WEEKLY_TARGET = 105000;      // 7 × 15000
+    const LIFETIME_TARGET = 1750000;
+    const LIFETIME_OFFSET = 320000;
 
-    // 🔑 BACKEND URL (Google Apps Script web app)
-    const API_URL = "https://script.google.com/macros/s/AKfycbxGiBoZT1GbEobbqw9ZhDRwqxGGNURRmVB4nEU9MKRF5ZXDaXG5o3fKhm-_l6gL_Is-/exec";
+    // 🔑 Your Apps Script Web App URL:
+    const API_URL = "YOUR_WEB_APP_URL_HERE";
 
-    // Global in-memory state from the server
-    let serverState = null;
+    // In-memory state, built from backend response
+    let appState = null;
 
     /***********************
      * UTILITIES           *
@@ -663,20 +662,13 @@
     }
 
     function formatNiceDate(dateStr) {
-      const d = new Date(dateStr);
-      if (Number.isNaN(d.getTime())) {
-        const parts = dateStr.split("-");
-        if (parts.length === 3) {
-          const [y, m, day] = parts.map(p => parseInt(p, 10));
-          return new Date(y, m - 1, day).toLocaleDateString(undefined, {
-            weekday: "short",
-            month: "short",
-            day: "numeric"
-          });
-        }
-        return dateStr;
-      }
-      return d.toLocaleDateString(undefined, {
+      if (!dateStr) return "";
+      const parts = dateStr.split("-");
+      if (parts.length !== 3) return dateStr;
+      const [y, m, d] = parts.map(Number);
+      const dt = new Date(y, m - 1, d);
+      if (Number.isNaN(dt.getTime())) return dateStr;
+      return dt.toLocaleDateString(undefined, {
         weekday: "short",
         month: "short",
         day: "numeric"
@@ -686,8 +678,8 @@
     function renderDate(dateStr) {
       const el = document.getElementById("current-date");
       if (!el) return;
-      const nice = formatNiceDate(dateStr || todayString());
-      el.textContent = nice;
+      const toUse = dateStr || todayString();
+      el.textContent = formatNiceDate(toUse);
     }
 
     /***********************
@@ -695,20 +687,20 @@
      ***********************/
     async function fetchStateFromServer() {
       const res = await fetch(API_URL, { method: "GET" });
-      if (!res.ok) throw new Error("Failed to fetch state from server");
+      if (!res.ok) throw new Error("Failed to fetch state");
       const data = await res.json();
 
-      // Normalize state
       const students = {};
       initialStudents.forEach(s => {
-        const id = s.id;
-        const src = (data.students && data.students[id]) || {};
-        students[id] = {
+        const src = (data.students && data.students[s.id]) || {};
+        students[s.id] = {
+          id: s.id,
           name: s.name,
           todayDocs: src.todayDocs || 0,
           lifetimeDocs: src.lifetimeDocs || 0,
           daysHitGoal: src.daysHitGoal || 0,
-          daysHitMax: src.daysHitMax || 0
+          daysHitMax: src.daysHitMax || 0,
+          streakSessionsToday: 0  // for celebrations only, not persisted
         };
       });
 
@@ -718,13 +710,13 @@
         lifetimeDocs: (data.team && data.team.lifetimeDocs) || LIFETIME_OFFSET
       };
 
-      serverState = {
+      appState = {
         today: data.today || todayString(),
         students,
         team
       };
 
-      renderDate(serverState.today);
+      renderDate(appState.today);
       renderAll();
     }
 
@@ -737,102 +729,99 @@
         });
       } catch (err) {
         console.error("Error logging delta:", err);
-        // We do not undo the optimistic UI; periodic refresh will correct any drift.
       }
     }
 
     /***********************
-     * CARD RENDERING      *
+     * CARD CREATION       *
      ***********************/
-    function createCardElement(studentId, data) {
+    function createCard(stu) {
       const card = document.createElement("div");
       card.className = "card";
-      card.dataset.studentId = studentId;
+      card.dataset.studentId = stu.id;
 
       card.innerHTML = `
         <div class="card-header">
-          <div class="name">${data.name}</div>
-          <div class="pill today-sessions-pill">
-            <span class="pill-label">Sessions</span>
-            <span class="pill-value today-sessions">0</span>
+          <div class="name">
+            <span>${stu.name}</span>
+            <span class="name-tag">${stu.id === "joe" ? "PI" : "RA"}</span>
+          </div>
+          <div class="daily-target">
+            Target: <strong>${DAILY_GOAL.toLocaleString()}</strong><br>
+            Max: <strong>${DAILY_MAX.toLocaleString()}</strong>
           </div>
         </div>
-        <div class="today-row">
-          <div class="metric">
-            <div class="metric-label">Today</div>
-            <div class="metric-value">
-              <span class="today-docs">0</span>
-              <span class="metric-suffix">/ ${DAILY_MAX.toLocaleString()}</span>
-            </div>
+        <div class="progress-row">
+          <div>Today: <strong><span class="today-docs">${stu.todayDocs}</span> / ${DAILY_MAX.toLocaleString()}</strong></div>
+          <div style="font-size:0.8rem;color:#9ca3af;">
+            Sessions: <span class="today-sessions">${Math.floor(stu.todayDocs / SESSION_SIZE)}</span>
           </div>
-          <button class="btn-primary btn-add-session">
-            +250
+        </div>
+        <div class="progress-bar-container">
+          <div class="progress-bar"></div>
+        </div>
+        <div class="progress-labels">
+          <span>0</span>
+          <span>${DAILY_GOAL.toLocaleString()} (goal)</span>
+          <span>${DAILY_MAX.toLocaleString()} (max)</span>
+        </div>
+        <div class="buttons">
+          <button class="btn-main" data-inc="250">+250</button>
+          <button class="btn-go2500 disabled" data-go2500="true">
+            <span class="emoji">🚀</span>
+            <span class="label">Go for 2500</span>
           </button>
+          <button class="btn-danger" data-dec="250">-250</button>
         </div>
-        <div class="progress-shell">
-          <div class="progress-track">
-            <div class="progress-bar"></div>
-          </div>
-          <div class="goal-markers">
-            <span>500</span><span>1000</span><span>1500</span><span>2000</span><span>2500</span>
-          </div>
+        <div class="stats-row">
+          <span class="stat-pill">
+            🔁 Sessions today:
+            <span class="value today-sessions-pill">${Math.floor(stu.todayDocs / SESSION_SIZE)}</span>
+          </span>
+          <span class="stat-pill">
+            📚 Lifetime: <span class="value lifetime-docs">${stu.lifetimeDocs}</span>
+          </span>
         </div>
-        <div class="badges-row">
-          <span class="badge badge-goal">2000+ days: <span class="goal-days">0</span></span>
-          <span class="badge badge-max">2500 days: <span class="max-days">0</span></span>
-        </div>
-        <div class="lifetime-row">
-          <div class="metric">
-            <div class="metric-label">Lifetime</div>
-            <div class="metric-value">
-              <span class="lifetime-docs">0</span>
-            </div>
-          </div>
-          <button class="btn-secondary btn-go2500 disabled" aria-disabled="true" title="This unlocks once you log at least 2000 downloads today.">
-            <span class="label">Locked – reach 2000</span>
-          </button>
+        <div class="achievements">
+          <span class="badge badge-goal">
+            🏆 <strong class="goal-days">${stu.daysHitGoal}</strong> days ≥ ${DAILY_GOAL}
+          </span>
+          <span class="badge badge-max">
+            🌟 <strong class="max-days">${stu.daysHitMax}</strong> days ≥ ${DAILY_MAX}
+          </span>
         </div>
       `;
 
-      attachCardHandlers(card, studentId);
+      const buttons = card.querySelectorAll("button");
+      buttons.forEach(btn => {
+        if (btn.dataset.inc) {
+          btn.addEventListener("click", () =>
+            changeDocs(stu.id, parseInt(btn.dataset.inc, 10))
+          );
+        } else if (btn.dataset.dec) {
+          btn.addEventListener("click", () =>
+            changeDocs(stu.id, -parseInt(btn.dataset.dec, 10))
+          );
+        } else if (btn.dataset.go2500) {
+          btn.addEventListener("click", () => handleGoFor2500(stu.id));
+        }
+      });
+
       return card;
     }
 
-    function attachCardHandlers(card, studentId) {
-      const addBtn = card.querySelector(".btn-add-session");
-      const goBtn = card.querySelector(".btn-go2500");
-
-      if (addBtn) {
-        addBtn.addEventListener("click", () => {
-          handleAddSession(studentId);
-        });
-      }
-
-      if (goBtn) {
-        goBtn.addEventListener("click", () => {
-          handleGo2500(studentId);
-        });
-      }
-    }
-
     function renderAll() {
-      if (!serverState) return;
-
+      if (!appState) return;
       const container = document.getElementById("cards-container");
       if (!container) return;
 
-      // If cards not yet created, create them
-      if (!container.hasChildNodes()) {
-        initialStudents.forEach(s => {
-          const data = serverState.students[s.id];
-          const card = createCardElement(s.id, data);
-          container.appendChild(card);
-        });
-      }
-
-      // Update visuals for each card
+      // Rebuild the grid each time for simplicity
+      container.innerHTML = "";
       initialStudents.forEach(s => {
-        updateCardVisuals(s.id);
+        const stu = appState.students[s.id];
+        const card = createCard(stu);
+        container.appendChild(card);
+        updateCardVisuals(stu.id);
       });
 
       updateTeamTrackers();
@@ -841,25 +830,35 @@
     /***********************
      * VISUAL UPDATES      *
      ***********************/
-    function updateBarColor(bar, todayDocs) {
-      if (!bar) return;
-      bar.classList.remove("bar-step1", "bar-step2", "bar-step3", "bar-step4", "bar-holo");
-      if (todayDocs >= DAILY_MAX) {
-        bar.classList.add("bar-holo");
-      } else if (todayDocs >= 2000) {
-        bar.classList.add("bar-step4");
-      } else if (todayDocs >= 1500) {
-        bar.classList.add("bar-step3");
-      } else if (todayDocs >= 1000) {
-        bar.classList.add("bar-step2");
-      } else if (todayDocs >= 500) {
-        bar.classList.add("bar-step1");
+    function updateBarColor(barEl, docs) {
+      barEl.classList.remove(
+        "bar-red",
+        "bar-orange",
+        "bar-yellow",
+        "bar-greenish",
+        "bar-green-strong",
+        "bar-holo"
+      );
+
+      if (docs >= DAILY_MAX) {
+        barEl.classList.add("bar-holo");
+      } else if (docs >= 2000) {
+        barEl.classList.add("bar-green-strong");
+      } else if (docs >= 1500) {
+        barEl.classList.add("bar-greenish");
+      } else if (docs >= 1000) {
+        barEl.classList.add("bar-yellow");
+      } else if (docs >= 500) {
+        barEl.classList.add("bar-orange");
+      } else {
+        barEl.classList.add("bar-red");
       }
     }
 
     function updateGo2500Button(card, docs) {
       const btn = card.querySelector(".btn-go2500");
       if (!btn) return;
+
       const label = btn.querySelector(".label");
 
       if (docs < DAILY_GOAL) {
@@ -884,9 +883,8 @@
     }
 
     function updateCardVisuals(studentId) {
-      if (!serverState) return;
-
-      const stu = serverState.students[studentId];
+      if (!appState) return;
+      const stu = appState.students[studentId];
       const card = document.querySelector(`.card[data-student-id="${studentId}"]`);
       if (!card || !stu) return;
 
@@ -926,16 +924,10 @@
         if (stu.todayDocs >= DAILY_MAX) badgeMax.classList.add("on");
         else badgeMax.classList.remove("on");
       }
-
-      if (stu.todayDocs >= DAILY_GOAL) {
-        card.classList.add("glow");
-      } else {
-        card.classList.remove("glow");
-      }
     }
 
     function updateTeamTrackers() {
-      if (!serverState) return;
+      if (!appState) return;
 
       const dailyLabel = document.querySelector(".team-daily-label");
       const dailyBar = document.querySelector(".team-daily-bar");
@@ -946,9 +938,9 @@
 
       if (!dailyLabel || !dailyBar || !weeklyLabel || !weeklyBar || !lifetimeLabel || !lifetimeBar) return;
 
-      const dailyDocs = serverState.team.dailyDocs || 0;
-      const weeklyDocs = serverState.team.weeklyDocs || 0;
-      const lifetimeDocs = serverState.team.lifetimeDocs || LIFETIME_OFFSET;
+      const dailyDocs = appState.team.dailyDocs || 0;
+      const weeklyDocs = appState.team.weeklyDocs || 0;
+      const lifetimeDocs = appState.team.lifetimeDocs || LIFETIME_OFFSET;
 
       dailyLabel.textContent = `${dailyDocs.toLocaleString()} / ${DAILY_TEAM_TARGET.toLocaleString()}`;
       weeklyLabel.textContent = `${weeklyDocs.toLocaleString()} / ${WEEKLY_TARGET.toLocaleString()}`;
@@ -978,88 +970,105 @@
     /***********************
      * ACTION HANDLERS     *
      ***********************/
-    function handleAddSession(studentId) {
-      if (!serverState) return;
-
-      const stu = serverState.students[studentId];
+    function changeDocs(studentId, delta) {
+      if (!appState) return;
+      const stu = appState.students[studentId];
       if (!stu) return;
 
-      const current = stu.todayDocs || 0;
-      if (current >= DAILY_MAX) return;
+      const prevDocs = stu.todayDocs;
+      let newDocs = prevDocs + delta;
+      if (newDocs < 0) newDocs = 0;
+      if (newDocs > DAILY_MAX) newDocs = DAILY_MAX;
 
-      let newTodayDocs = current + SESSION_SIZE;
-      if (newTodayDocs > DAILY_MAX) newTodayDocs = DAILY_MAX;
-      const delta = newTodayDocs - current;
-      if (delta <= 0) return;
+      const effectiveDelta = newDocs - prevDocs;
+      if (effectiveDelta === 0) return;
 
-      // Optimistic local update for the student
-      stu.todayDocs = newTodayDocs;
-      stu.lifetimeDocs = (stu.lifetimeDocs || 0) + delta;
+      stu.todayDocs = newDocs;
+      stu.lifetimeDocs = (stu.lifetimeDocs || 0) + effectiveDelta;
 
-      // Team-level optimistic updates
-      serverState.team.dailyDocs = (serverState.team.dailyDocs || 0) + delta;
-      serverState.team.weeklyDocs = (serverState.team.weeklyDocs || 0) + delta;
-      serverState.team.lifetimeDocs = (serverState.team.lifetimeDocs || LIFETIME_OFFSET) + delta;
+      // Update team counts optimistically
+      appState.team.dailyDocs = (appState.team.dailyDocs || 0) + effectiveDelta;
+      appState.team.weeklyDocs = (appState.team.weeklyDocs || 0) + effectiveDelta;
+      appState.team.lifetimeDocs = (appState.team.lifetimeDocs || LIFETIME_OFFSET) + effectiveDelta;
+
+      const prevSessions = Math.floor(prevDocs / SESSION_SIZE);
+      const newSessions = Math.floor(newDocs / SESSION_SIZE);
+      if (newSessions > prevSessions && effectiveDelta > 0) {
+        stu.streakSessionsToday = (stu.streakSessionsToday || 0) + (newSessions - prevSessions);
+        triggerCelebration("session", stu.name, stu.streakSessionsToday);
+      }
+
+      const crossedGoal = prevDocs < DAILY_GOAL && newDocs >= DAILY_GOAL;
+      const crossedMax = prevDocs < DAILY_MAX && newDocs >= DAILY_MAX;
+
+      if (crossedGoal) {
+        triggerCelebration("goal", stu.name);
+      }
+      if (crossedMax) {
+        triggerCelebration("max", stu.name);
+      }
 
       updateCardVisuals(studentId);
       updateTeamTrackers();
 
-      // Trigger celebrations based on thresholds
-      const sessions = Math.floor(newTodayDocs / SESSION_SIZE);
-      if (newTodayDocs >= DAILY_MAX) {
-        triggerCelebration("max", stu.name, sessions);
-      } else if (newTodayDocs >= DAILY_GOAL && current < DAILY_GOAL) {
-        triggerCelebration("goal", stu.name, sessions);
-      } else {
-        triggerCelebration("session", stu.name, sessions);
-      }
-
-      // Log to backend (fire-and-forget)
-      logDeltaToServer(studentId, delta);
+      // Log this change to the backend
+      logDeltaToServer(studentId, effectiveDelta);
     }
 
-    function handleGo2500(studentId) {
-      if (!serverState) return;
-      const stu = serverState.students[studentId];
+    function handleGoFor2500(studentId) {
+      if (!appState) return;
+      const stu = appState.students[studentId];
       if (!stu || stu.todayDocs < DAILY_GOAL) return;
-
       triggerCelebration("go2500", stu.name, Math.floor(stu.todayDocs / SESSION_SIZE));
     }
 
     /***********************
      * CELEBRATION EFFECTS *
      ***********************/
+    const celebrationEl = document.getElementById("celebration");
+    const celebrationTitle = document.getElementById("celebration-title");
+    const celebrationSub = document.getElementById("celebration-sub");
+
     function triggerCelebration(type, name, streakCount) {
-      const celebrationEl = document.getElementById("celebration");
-      const celebrationTitle = document.getElementById("celebration-title");
-      const celebrationSub = document.getElementById("celebration-sub");
       if (!celebrationEl || !celebrationTitle || !celebrationSub) return;
 
-      let title = "Nice work!";
-      let confettiEmojis = ["✨", "📄", "⚡️", "💾"];
+      let title = "";
+      let sub = "";
+      let confettiEmojis = [];
 
       if (type === "session") {
-        title = `${name} logged another 250!`;
+        const intensifiers = [
+          "Session complete!",
+          "Double session!",
+          "Triple threat!",
+          "Four in a row! 🔥",
+          "You’re on fire! 🔥🔥",
+          "Download machine! 🤖"
+        ];
+        const idx = Math.min((streakCount || 1) - 1, intensifiers.length - 1);
+        title = `${name}: ${intensifiers[idx]}`;
+        sub = `You just completed another ${SESSION_SIZE} articles. Total sessions today: ${streakCount || "?"}.`;
         confettiEmojis = ["✨", "📄", "⚡️", "💾"];
       } else if (type === "goal") {
         title = `${name} hit the daily goal! 🏆`;
+        sub = `🎯 ${DAILY_GOAL.toLocaleString()} articles downloaded today.`;
         confettiEmojis = ["🏆", "🎉", "📚", "🚀"];
       } else if (type === "max") {
         title = `${name} maxed out the system! 🌟`;
+        sub = `Legend status: ${DAILY_MAX.toLocaleString()} articles in a single day.`;
         confettiEmojis = ["🌟", "🤯", "🔥", "🎊"];
       } else if (type === "go2500") {
         title = `${name}, go for 2500! 🚀`;
+        sub = `You’ve hit the goal. One more push to ${DAILY_MAX.toLocaleString()} – you’ve got this.`;
         confettiEmojis = ["🚀", "📈", "✨", "🔥"];
       }
 
       celebrationTitle.textContent = title;
       celebrationSub.textContent = "";
 
-      // Clear old confetti
       const old = celebrationEl.querySelectorAll(".confetti");
       old.forEach(el => el.remove());
 
-      // Full-page confetti: sprinkle across viewport
       const totalConfetti = 40;
       const overlayRect = celebrationEl.getBoundingClientRect();
       for (let i = 0; i < totalConfetti; i++) {
@@ -1086,6 +1095,7 @@
      * INIT                *
      ***********************/
     async function init() {
+      renderDate("Loading...");
       try {
         await fetchStateFromServer();
       } catch (err) {
@@ -1093,15 +1103,15 @@
         renderDate(todayString());
       }
 
-      // Periodic refresh to correct any drift
+      // Periodic refresh to pick up others' progress
       setInterval(() => {
-        fetchStateFromServer().catch(err => console.error("Periodic refresh failed:", err));
-      }, 2 * 60 * 1000); // every 2 minutes
+        fetchStateFromServer().catch(err =>
+          console.error("Periodic refresh failed:", err)
+        );
+      }, 120000); // every 2 minutes
     }
 
     document.addEventListener("DOMContentLoaded", init);
   </script>
-</body>
-</html>
 </body>
 </html>
