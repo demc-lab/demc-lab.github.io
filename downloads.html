@@ -646,7 +646,7 @@
     const LIFETIME_OFFSET = 320000;
 
     // 🔑 Your Apps Script Web App URL:
-    const API_URL = "https://script.google.com/macros/s/AKfycbxGiBoZT1GbEobbqw9ZhDRwqxGGNURRmVB4nEU9MKRF5ZXDaXG5o3fKhm-_l6gL_Is-/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbzqdtRSQCQuH_j8n_fKVpmC7tUckHXuc18A2ZF6fPuBesmWQy9GCZB7uqPF8Kg5nmIt/exec";
 
     // In-memory state, built from backend response
     let appState = null;
@@ -724,7 +724,6 @@
 async function logDeltaToServer(studentId, delta) {
   try {
     const url = `${API_URL}?log=1&studentId=${encodeURIComponent(studentId)}&delta=${encodeURIComponent(delta)}`;
-    // Fire-and-forget GET; aggregation uses plain GET without ?log=1
     fetch(url, { method: "GET" }).catch(err => {
       console.error("Error logging delta (fetch failed):", err);
     });
