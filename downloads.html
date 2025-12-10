@@ -721,17 +721,20 @@
       renderAll();
     }
 
-    async function logDeltaToServer(studentId, delta) {
-      try {
-        await fetch(API_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ studentId, delta })
-        });
-      } catch (err) {
-        console.error("Error logging delta:", err);
-      }
-    }
+async function logDeltaToServer(studentId, delta) {
+  try {
+    const body = new URLSearchParams();
+    body.set("studentId", studentId);
+    body.set("delta", String(delta));
+
+    await fetch(API_URL, {
+      method: "POST",
+      body // sends as application/x-www-form-urlencoded (simple request)
+    });
+  } catch (err) {
+    console.error("Error logging delta:", err);
+  }
+}
 
     /***********************
      * CARD CREATION       *
