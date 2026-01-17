@@ -1,0 +1,539 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Live Poll</title>
+
+  <!-- Chart.js (CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <style>
+    :root{
+      --bg: #0b1020;
+      --panel: rgba(255,255,255,0.08);
+      --panel2: rgba(255,255,255,0.10);
+      --text: rgba(255,255,255,0.92);
+      --muted: rgba(255,255,255,0.72);
+      --accent: #7ee787;
+      --accent2: #79c0ff;
+      --danger: #ff7b72;
+      --shadow: 0 18px 60px rgba(0,0,0,0.35);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+    body{
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background:
+        radial-gradient(1200px 900px at 20% 10%, rgba(121,192,255,0.20), transparent 55%),
+        radial-gradient(1200px 900px at 80% 20%, rgba(126,231,135,0.16), transparent 55%),
+        radial-gradient(900px 700px at 50% 90%, rgba(255,123,114,0.10), transparent 60%),
+        var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 22px;
+    }
+
+    .wrap{
+      width: min(1100px, 100%);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    @media (max-width: 900px){
+      .wrap{ grid-template-columns: 1fr; }
+    }
+
+    .card{
+      background: linear-gradient(180deg, var(--panel), rgba(255,255,255,0.05));
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px 18px 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before{
+      content:"";
+      position:absolute;
+      inset:-1px;
+      background: radial-gradient(900px 400px at 10% 0%, rgba(121,192,255,0.18), transparent 55%),
+                  radial-gradient(900px 400px at 90% 10%, rgba(126,231,135,0.12), transparent 55%);
+      pointer-events:none;
+      opacity:0.8;
+    }
+
+    .card > * { position: relative; }
+
+    .title{
+      font-size: 14px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 0 0 8px;
+    }
+
+    .question{
+      font-size: clamp(20px, 2.5vw, 30px);
+      line-height: 1.15;
+      font-weight: 750;
+      margin: 0 0 14px;
+    }
+
+    .sub{
+      margin: 0 0 14px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .options{
+      display: grid;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .opt{
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 14px;
+      padding: 12px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      user-select: none;
+      transition: transform 120ms ease, background 120ms ease, border-color 120ms ease;
+    }
+
+    .opt:hover{
+      transform: translateY(-1px);
+      background: rgba(255,255,255,0.08);
+      border-color: rgba(255,255,255,0.16);
+    }
+
+    .badge{
+      width: 28px;
+      height: 28px;
+      border-radius: 10px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      color: rgba(10,16,32,0.95);
+      background: linear-gradient(135deg, rgba(121,192,255,0.95), rgba(126,231,135,0.85));
+      flex: 0 0 auto;
+      box-shadow: 0 10px 22px rgba(0,0,0,0.25);
+    }
+
+    .opt input{ display:none; }
+
+    .opt .label{
+      font-size: 16px;
+      font-weight: 650;
+      line-height: 1.2;
+    }
+
+    .actions{
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-top: 14px;
+    }
+
+    button{
+      appearance: none;
+      border: 1px solid rgba(255,255,255,0.16);
+      background: rgba(255,255,255,0.08);
+      color: var(--text);
+      border-radius: 14px;
+      padding: 10px 12px;
+      font-weight: 750;
+      cursor: pointer;
+      transition: transform 120ms ease, background 120ms ease, border-color 120ms ease, opacity 120ms ease;
+    }
+    button:hover{
+      transform: translateY(-1px);
+      background: rgba(255,255,255,0.11);
+      border-color: rgba(255,255,255,0.22);
+    }
+    button:disabled{
+      opacity: 0.55;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .primary{
+      background: linear-gradient(135deg, rgba(126,231,135,0.55), rgba(121,192,255,0.35));
+      border-color: rgba(126,231,135,0.35);
+    }
+
+    .status{
+      font-size: 13px;
+      color: var(--muted);
+      margin-left: auto;
+      display:flex;
+      gap:8px;
+      align-items:center;
+    }
+    .dot{
+      width: 8px; height: 8px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.35);
+    }
+    .dot.live{ background: var(--accent); box-shadow: 0 0 0 6px rgba(126,231,135,0.12); }
+
+    .chartWrap{
+      height: 420px;
+    }
+    @media (max-width: 900px){
+      .chartWrap{ height: 360px; }
+    }
+
+    .tiny-secret{
+      position: fixed;
+      left: 10px;
+      bottom: 10px;
+      width: 14px;
+      height: 14px;
+      border-radius: 6px;
+      background: rgba(255,255,255,0.10);
+      border: 1px solid rgba(255,255,255,0.12);
+      cursor: pointer;
+      opacity: 0.35;
+      transition: opacity 120ms ease, transform 120ms ease;
+      z-index: 9999;
+    }
+    .tiny-secret:hover{
+      opacity: 0.7;
+      transform: translateY(-1px);
+    }
+
+    .footerNote{
+      margin-top: 10px;
+      font-size: 12px;
+      color: rgba(255,255,255,0.60);
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.10);
+      color: rgba(255,255,255,0.80);
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="card" aria-label="Poll input">
+      <p class="title">Live Poll</p>
+      <h1 id="qText" class="question">Loading question…</h1>
+      <p id="qSub" class="sub">Choose one option. Results update live.</p>
+
+      <div id="options" class="options" role="radiogroup" aria-label="Options"></div>
+
+      <div class="actions">
+        <button id="voteBtn" class="primary" disabled>Submit</button>
+        <button id="revoteBtn" disabled title="Change your vote on this device">Change vote</button>
+
+        <div class="status" title="Live connection status">
+          <span id="liveDot" class="dot"></span>
+          <span id="liveText">Connecting…</span>
+        </div>
+      </div>
+
+      <div class="footerNote">
+        <span class="pill">Anonymous • aggregated counts only</span>
+      </div>
+    </section>
+
+    <section class="card" aria-label="Results">
+      <p class="title">Results</p>
+      <div class="chartWrap">
+        <canvas id="chart"></canvas>
+      </div>
+      <p id="countNote" class="footerNote"></p>
+    </section>
+  </div>
+
+  <div id="secretClear" class="tiny-secret" title="(instructor)"></div>
+
+  <script>
+    /**********************
+     * EDIT THESE TWO LINES
+     **********************/
+    const SCRIPT_URL = "https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec";
+    const POLL_ID = "Choose One - cats"; // should match the tab name in your Google Sheet
+
+    /**********************
+     * OPTIONAL SETTINGS
+     **********************/
+    const REFRESH_MS = 1500;           // how often we poll for updated results
+    const LOCAL_LOCK_KEY = `poll_lock_${POLL_ID}`; // used to prevent revoting on same device (optional)
+
+    let poll = null;
+    let chart = null;
+    let selectedValue = null;
+    let refreshTimer = null;
+
+    const elQ = document.getElementById("qText");
+    const elSub = document.getElementById("qSub");
+    const elOptions = document.getElementById("options");
+    const elVote = document.getElementById("voteBtn");
+    const elReVote = document.getElementById("revoteBtn");
+    const elLiveDot = document.getElementById("liveDot");
+    const elLiveText = document.getElementById("liveText");
+    const elCountNote = document.getElementById("countNote");
+
+    function setLive(ok, msg){
+      elLiveDot.classList.toggle("live", !!ok);
+      elLiveText.textContent = msg || (ok ? "Live" : "Offline");
+    }
+
+    function hasVotedOnThisDevice(){
+      return localStorage.getItem(LOCAL_LOCK_KEY) === "1";
+    }
+
+    function setVotedOnThisDevice(v){
+      localStorage.setItem(LOCAL_LOCK_KEY, v ? "1" : "0");
+    }
+
+    function buildOptions(options){
+      elOptions.innerHTML = "";
+      selectedValue = null;
+      elVote.disabled = true;
+
+      options.forEach((opt, idx) => {
+        const id = `opt_${idx}`;
+        const wrap = document.createElement("label");
+        wrap.className = "opt";
+        wrap.setAttribute("for", id);
+
+        const badge = document.createElement("span");
+        badge.className = "badge";
+        badge.textContent = (opt.value || "").toString().trim() || String.fromCharCode(65 + idx);
+
+        const input = document.createElement("input");
+        input.type = "radio";
+        input.name = "poll_option";
+        input.id = id;
+        input.value = opt.value;
+
+        const label = document.createElement("div");
+        label.className = "label";
+        label.textContent = opt.label;
+
+        wrap.appendChild(badge);
+        wrap.appendChild(input);
+        wrap.appendChild(label);
+
+        wrap.addEventListener("click", () => {
+          selectedValue = opt.value;
+          elVote.disabled = hasVotedOnThisDevice(); // disable if already voted
+          if (!hasVotedOnThisDevice()) elVote.disabled = false;
+        });
+
+        elOptions.appendChild(wrap);
+      });
+
+      // vote button states
+      if (hasVotedOnThisDevice()){
+        elVote.disabled = true;
+        elReVote.disabled = false;
+        elSub.textContent = "Vote recorded on this device. (Instructor can allow changing vote.)";
+      } else {
+        elReVote.disabled = true;
+        elSub.textContent = "Choose one option. Results update live.";
+      }
+    }
+
+    function initChart(labels, counts){
+      const ctx = document.getElementById("chart");
+      chart = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels,
+          datasets: [{
+            label: "Votes",
+            data: counts,
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: { enabled: true }
+          },
+          scales: {
+            x: {
+              ticks: { color: "rgba(255,255,255,0.85)", font: { weight: 650 } },
+              grid: { color: "rgba(255,255,255,0.08)" }
+            },
+            y: {
+              beginAtZero: true,
+              ticks: { color: "rgba(255,255,255,0.75)" },
+              grid: { color: "rgba(255,255,255,0.08)" }
+            }
+          }
+        }
+      });
+    }
+
+    function updateChart(labels, counts){
+      if (!chart){
+        initChart(labels, counts);
+        return;
+      }
+      chart.data.labels = labels;
+      chart.data.datasets[0].data = counts;
+      chart.update();
+    }
+
+    async function apiGetPoll(){
+      const url = `${SCRIPT_URL}?action=get&poll=${encodeURIComponent(POLL_ID)}&t=${Date.now()}`;
+      const res = await fetch(url, { method: "GET" });
+      if (!res.ok) throw new Error(`GET failed: ${res.status}`);
+      return await res.json();
+    }
+
+    async function apiVote(value){
+      const res = await fetch(SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ action: "vote", poll: POLL_ID, value })
+      });
+      if (!res.ok) throw new Error(`POST vote failed: ${res.status}`);
+      return await res.json();
+    }
+
+    async function apiClear(adminCode){
+      const res = await fetch(SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ action: "clear", poll: POLL_ID, adminCode })
+      });
+      if (!res.ok) throw new Error(`POST clear failed: ${res.status}`);
+      return await res.json();
+    }
+
+    async function loadInitial(){
+      try{
+        setLive(false, "Connecting…");
+        const data = await apiGetPoll();
+        poll = data;
+
+        elQ.textContent = poll.question || "Untitled poll";
+        buildOptions(poll.options || []);
+
+        const labels = (poll.options || []).map(o => o.label);
+        const counts = (poll.options || []).map(o => Number(o.count || 0));
+        updateChart(labels, counts);
+
+        const total = counts.reduce((a,b)=>a+b,0);
+        elCountNote.textContent = `Total votes: ${total}`;
+        setLive(true, "Live");
+      } catch (e){
+        console.error(e);
+        setLive(false, "Offline");
+        elQ.textContent = "Couldn’t load poll.";
+        elSub.textContent = "Check SCRIPT_URL and deployment permissions.";
+      }
+    }
+
+    async function refreshLoop(){
+      try{
+        const data = await apiGetPoll();
+        poll = data;
+        // Update question/options if instructor edited sheet live
+        elQ.textContent = poll.question || "Untitled poll";
+
+        // If options changed (count or text), rebuild safely
+        const existingLabels = Array.from(elOptions.querySelectorAll(".label")).map(x => x.textContent);
+        const newLabels = (poll.options || []).map(o => o.label);
+        const optionsChanged = existingLabels.join("||") !== newLabels.join("||");
+
+        if (optionsChanged){
+          buildOptions(poll.options || []);
+        }
+
+        const labels = (poll.options || []).map(o => o.label);
+        const counts = (poll.options || []).map(o => Number(o.count || 0));
+        updateChart(labels, counts);
+
+        const total = counts.reduce((a,b)=>a+b,0);
+        elCountNote.textContent = `Total votes: ${total}`;
+        setLive(true, "Live");
+      } catch (e){
+        console.error(e);
+        setLive(false, "Offline");
+      }
+    }
+
+    elVote.addEventListener("click", async () => {
+      if (!selectedValue) return;
+      elVote.disabled = true;
+      try{
+        await apiVote(selectedValue);
+        setVotedOnThisDevice(true);
+        elReVote.disabled = false;
+        elSub.textContent = "Vote recorded on this device.";
+        await refreshLoop();
+      } catch (e){
+        console.error(e);
+        setVotedOnThisDevice(false);
+        elSub.textContent = "Vote failed. Try again.";
+        elVote.disabled = false;
+      }
+    });
+
+    elReVote.addEventListener("click", () => {
+      // This is intentionally “soft security” — you can disable this button entirely if you want.
+      setVotedOnThisDevice(false);
+      elReVote.disabled = true;
+      elSub.textContent = "You can change your vote now (this device only).";
+      elVote.disabled = !selectedValue;
+    });
+
+    // Secret clear button (bottom-left)
+    document.getElementById("secretClear").addEventListener("click", async () => {
+      const adminCode = prompt("Instructor code to clear this poll:");
+      if (!adminCode) return;
+      try{
+        const out = await apiClear(adminCode);
+        if (out && out.ok){
+          // also clear local locks on this device so instructor can reuse quickly
+          setVotedOnThisDevice(false);
+          await refreshLoop();
+          alert("Cleared.");
+        } else {
+          alert("Wrong code (or clear failed).");
+        }
+      } catch (e){
+        console.error(e);
+        alert("Clear failed. Check deployment and code.");
+      }
+    });
+
+    // Kickoff
+    (async () => {
+      await loadInitial();
+      refreshTimer = setInterval(refreshLoop, REFRESH_MS);
+    })();
+  </script>
+</body>
+</html>
