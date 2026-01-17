@@ -9,15 +9,22 @@
 
   <style>
     :root{
-      /* Base */
-      --bg: #ffffff;
+      /* Dark site background (complements your palette) */
+      --bg0: #070b16;
+      --bg1: #0a1224;
+      --bg2: #081a20;
+
+      /* Card surface (light frosted) */
+      --card: rgba(255,255,255,0.86);
+      --card2: rgba(255,255,255,0.72);
+      --border: rgba(255,255,255,0.22);
+      --border2: rgba(15,23,42,0.14);
+      --shadow: 0 16px 55px rgba(0,0,0,0.40);
+      --radius: 16px;
+
+      /* Text inside cards */
       --text: #0f172a;       /* near-slate */
       --muted: #475569;      /* slate */
-      --border: #e2e8f0;     /* light border */
-      --panel: #ffffff;
-      --panel2: #f8fafc;     /* very light gray */
-      --shadow: 0 10px 30px rgba(2,6,23,0.08);
-      --radius: 14px;
 
       /* Your categorical palette */
       --c1: #003b49;
@@ -27,23 +34,32 @@
       --c5: #5d3754;
       --c6: #007a78;
 
-      /* UI accents (derived, non-categorical) */
+      /* UI accents */
       --accent: var(--c2);
-      --accentSoft: rgba(29,66,137,0.10);
+      --accentSoft: rgba(29,66,137,0.14);
       --danger: var(--c3);
+
+      /* Body text on dark bg */
+      --bodyText: rgba(255,255,255,0.88);
+      --bodyMuted: rgba(255,255,255,0.64);
     }
 
     * { box-sizing: border-box; }
+
     body{
       margin: 0;
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-      background: var(--bg);
-      color: var(--text);
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 20px;
+      padding: 22px;
+      color: var(--bodyText);
+      background:
+        radial-gradient(900px 520px at 14% 18%, rgba(0,122,120,0.34), transparent 55%),
+        radial-gradient(900px 520px at 86% 22%, rgba(29,66,137,0.32), transparent 56%),
+        radial-gradient(900px 520px at 50% 88%, rgba(211,39,62,0.20), transparent 60%),
+        linear-gradient(180deg, var(--bg1), var(--bg0));
     }
 
     .wrap{
@@ -56,26 +72,44 @@
       .wrap{ grid-template-columns: 1fr; }
     }
 
+    /* Frosted glass card: light surface + subtle blur + border */
     .card{
-      background: var(--panel);
+      background: linear-gradient(180deg, var(--card), var(--card2));
       border: 1px solid var(--border);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       padding: 18px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      position: relative;
+      overflow: hidden;
+      color: var(--text);
     }
+
+    .card::before{
+      content:"";
+      position:absolute;
+      inset:-2px;
+      background:
+        radial-gradient(520px 240px at 12% 0%, rgba(0,122,120,0.12), transparent 55%),
+        radial-gradient(520px 240px at 90% 8%, rgba(29,66,137,0.12), transparent 55%);
+      pointer-events:none;
+      opacity: 0.9;
+    }
+    .card > * { position: relative; }
 
     .title{
       font-size: 12px;
       letter-spacing: 0.12em;
       text-transform: uppercase;
-      color: var(--muted);
+      color: rgba(15,23,42,0.62);
       margin: 0 0 8px;
     }
 
     .question{
       font-size: clamp(20px, 2.3vw, 28px);
       line-height: 1.2;
-      font-weight: 750;
+      font-weight: 780;
       margin: 0 0 12px;
       color: var(--c1);
     }
@@ -93,7 +127,7 @@
     }
 
     .opt{
-      border: 1px solid var(--border);
+      border: 1px solid rgba(15,23,42,0.10);
       border-radius: 12px;
       padding: 12px 12px;
       display: grid;
@@ -101,20 +135,20 @@
       gap: 10px;
       cursor: pointer;
       user-select: none;
-      background: var(--panel2);
-      transition: transform 110ms ease, border-color 110ms ease, background 110ms ease;
+      background: rgba(255,255,255,0.62);
+      transition: transform 110ms ease, border-color 110ms ease, background 110ms ease, box-shadow 110ms ease;
     }
 
     .opt:hover{
       transform: translateY(-1px);
-      border-color: rgba(29,66,137,0.35);
-      background: #ffffff;
+      border-color: rgba(29,66,137,0.26);
+      background: rgba(255,255,255,0.78);
     }
 
     .opt.selected{
       border-color: rgba(29,66,137,0.55);
       box-shadow: 0 0 0 3px var(--accentSoft);
-      background: #ffffff;
+      background: rgba(255,255,255,0.88);
     }
 
     .badge{
@@ -124,9 +158,10 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      font-weight: 800;
+      font-weight: 850;
       color: #ffffff;
       background: var(--c2);
+      box-shadow: 0 8px 18px rgba(0,0,0,0.12);
     }
 
     .opt input{ display:none; }
@@ -149,19 +184,19 @@
 
     button{
       appearance: none;
-      border: 1px solid var(--border);
-      background: #ffffff;
+      border: 1px solid rgba(15,23,42,0.14);
+      background: rgba(255,255,255,0.82);
       color: var(--text);
       border-radius: 12px;
       padding: 10px 12px;
-      font-weight: 750;
+      font-weight: 780;
       cursor: pointer;
       transition: transform 110ms ease, border-color 110ms ease, background 110ms ease, opacity 110ms ease;
     }
     button:hover{
       transform: translateY(-1px);
-      border-color: rgba(2,6,23,0.18);
-      background: #ffffff;
+      border-color: rgba(15,23,42,0.20);
+      background: rgba(255,255,255,0.92);
     }
     button:disabled{
       opacity: 0.55;
@@ -185,12 +220,12 @@
       gap: 8px;
       align-items: center;
       font-size: 13px;
-      color: var(--muted);
+      color: rgba(15,23,42,0.62);
     }
     .dot{
       width: 10px; height: 10px;
       border-radius: 999px;
-      background: #cbd5e1;
+      background: rgba(15,23,42,0.18);
     }
     .dot.live{ background: var(--c6); }
 
@@ -204,10 +239,10 @@
     .footerNote{
       margin-top: 10px;
       font-size: 12px;
-      color: var(--muted);
+      color: rgba(15,23,42,0.60);
     }
 
-    /* “Secret” clear button: tiny + subtle on white */
+    /* Secret clear button: subtle on dark background */
     .tiny-secret{
       position: fixed;
       left: 10px;
@@ -215,17 +250,20 @@
       width: 14px;
       height: 14px;
       border-radius: 6px;
-      background: #ffffff;
-      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.14);
+      border: 1px solid rgba(255,255,255,0.18);
       cursor: pointer;
-      opacity: 0.35;
-      transition: opacity 110ms ease, transform 110ms ease, border-color 110ms ease;
+      opacity: 0.45;
+      transition: opacity 110ms ease, transform 110ms ease, border-color 110ms ease, background 110ms ease;
       z-index: 9999;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
     }
     .tiny-secret:hover{
-      opacity: 0.85;
+      opacity: 0.95;
       transform: translateY(-1px);
       border-color: rgba(211,39,62,0.55);
+      background: rgba(255,255,255,0.22);
     }
   </style>
 </head>
@@ -390,13 +428,13 @@
           },
           scales: {
             x: {
-              ticks: { color: "#334155", font: { weight: "600" } },
+              ticks: { color: "rgba(15,23,42,0.78)", font: { weight: "600" } },
               grid: { display: false }
             },
             y: {
               beginAtZero: true,
-              ticks: { color: "#475569" },
-              grid: { color: "#e2e8f0" }
+              ticks: { color: "rgba(15,23,42,0.62)" },
+              grid: { color: "rgba(15,23,42,0.10)" }
             }
           }
         }
