@@ -3,159 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dynamic Environments and Meaning Change Lab – Projects</title>
+    <title>Dynamic Environments and Meaning Change Lab - Projects</title>
     <link rel="stylesheet" href="style.css">
-
-    <!-- PAGE‑SPECIFIC OVERRIDES FOR PROJECT LAYOUT -->
-    <style>
-      /* Container for each project: flex to place text & image side by side */
-      .projects article {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: flex-start;
-        justify-content: space-between;
-        margin-bottom: 2em;
-      }
-
-      /* Ensure project titles are left‑aligned and span full width */
-      .projects article h4 {
-        flex-basis: 100%;
-        text-align: left;
-        margin-bottom: 0.5em;
-      }
-
-      /* Left column: the text */
-      .project-text {
-        flex: 1 1 60%;
-        text-align: left;
-        margin-right: 1em;
-      }
-      .project-text p {
-        /* remove any gray‑box styling inherited from style.css */
-        background: none !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        border-radius: 0 !important;
-        box-shadow: none !important;
-      }
-
-      /* Right column: the image placeholder */
-      .project-image {
-        flex: 1 1 35%;
-        text-align: right;
-      }
-      .project-image img {
-        max-width: 100%;
-        height: auto;
-        display: block;
-      }
-
-      /* Tweak the intro paragraph spacing */
-      .projects > p {
-        margin-bottom: 1.5em;
-      }
-    </style>
 </head>
 <body>
-    <header>
-        <h1>
-          <a href="index.html" class="title-link">
-            Dynamic Environments and Meaning Change Lab
-          </a>
-        </h1>
-        <nav>
-            <ul>
-                <li><a href="index.html">About</a></li>
-                <li><a href="people.html">People</a></li>
-                <li><a href="projects.html">Projects</a></li>
-                <li><a href="publications.html">Publications</a></li>
-                <li><a href="contact.html">Contact</a></li>
-            </ul>
-        </nav>
+    <header class="site-header">
+        <div class="site-header-inner">
+            <a href="index.html" class="site-title">Dynamic Environments and Meaning Change Lab</a>
+            <nav class="site-nav" aria-label="Primary">
+                <ul>
+                    <li><a href="index.html">About</a></li>
+                    <li><a href="people.html">People</a></li>
+                    <li><a href="projects.html" aria-current="page">Projects</a></li>
+                    <li><a href="publications.html">Publications</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
     </header>
 
-    <main>
-        <h2>What we’re working on</h2>
-        <div class="projects">
+    <main class="site-main">
+        <section class="page-intro">
+            <h1>Projects</h1>
             <p>Here are some projects in our pipeline.</p>
+        </section>
 
-            <article>
-                <h4>Can culture evolve through "unsettled times?"</h4>
-                <div class="project-text">
+        <section class="project-list">
+            <article class="project-card">
+                <div class="project-copy">
+                    <h2>Can culture evolve through unsettled times?</h2>
                     <p>
-                      Can large-scale environmental disruptions create cultural belief change? While prevailing models of cultural change emphasize 
-                        the stability of beliefs in adults, we propose that durable belief change can occur when major events transform a society’s 
-                        material or cultural environment in ways that make specific stimuli unexpectedly salient. Like certain occupations during
-                        the Covid-19 pandemic lockdown period.
+                        Can large-scale environmental disruptions create cultural belief change? While prevailing models of
+                        cultural change emphasize the stability of beliefs in adults, we propose that durable belief change can
+                        occur when major events transform a society's material or cultural environment in ways that make specific
+                        stimuli unexpectedly salient, such as certain occupations during the Covid-19 pandemic lockdown period.
                     </p>
                 </div>
-                <div class="project-image">
-                    <img src="image1.jpg" alt="Cultural evolution project image">
+                <div class="project-media">
+                    <img src="image1.jpg" alt="Cultural evolution project image" loading="lazy">
                 </div>
             </article>
 
-            <article>
-                <h4>Simulating active search in networks</h4>
-                <div class="project-text">
+            <article class="project-card">
+                <div class="project-copy">
+                    <h2>Simulating active search in networks</h2>
                     <p>
-                      Networks impact how we acquire information and adopt behaviors. Current models of these processes highlight the influence of 
-                        social structures on person- and system-level outcomes, but in doing so they do so by reducing the people within them to 
-                        cultural dupes who are "infected" only by passive contact or peer pressure. By contrast, actors often actively and 
-                        strategically seek out ideas or practices they may adopt in ways that are patterned by their social networks. We're
-                        elaborating this argument through a set of agent-based network models that augment existing approaches with active search
-                        routines inspired by network theory and cognitive science.
+                        Networks impact how we acquire information and adopt behaviors. Current models of these processes
+                        highlight the influence of social structures on person- and system-level outcomes, but often reduce
+                        people to passive cultural dupes. By contrast, actors often actively and strategically seek out ideas
+                        or practices they may adopt in ways that are patterned by their social networks. We are elaborating
+                        this argument through a set of agent-based network models that augment existing approaches with active
+                        search routines inspired by network theory and cognitive science.
                     </p>
                 </div>
-                <div class="project-image">
-                    <img src="image2.jpg" alt="Social contagion model image">
+                <div class="project-media">
+                    <img src="image2.jpg" alt="Social contagion model image" loading="lazy">
                 </div>
             </article>
 
-            <!--<article>
-                <h4>Given the choice, do people prefer to compete with neighbors or strangers?</h4>
-                <div class="project-text">
+            <article class="project-card">
+                <div class="project-copy">
+                    <h2>Can working from home reduce the motherhood penalty?</h2>
                     <p>
-                      Data collection in progress! More soon.
+                        Mothers who work are paid and promoted less, hired less often, and viewed as less competent and less
+                        committed to their organizations compared to women who are not mothers. One well-identified cause of
+                        this motherhood penalty is discrimination against mothers. While researchers often explain the penalty
+                        as the result of conflicting cultural meanings that underpin the roles of mothers and workers, those
+                        schemas have not yet been clearly measured or linked directly to the penalty. We are measuring these
+                        schemas and examining whether remote work opportunities can reduce the motherhood penalty by reducing
+                        role conflict.
                     </p>
                 </div>
-                <div class="project-image">
-                    <img src="image3.jpg" alt="Dyadic tie-formation image">
-                </div>
-            </article>-->
-
-            <article>
-                <h4>Can working from home reduce the motherhood penalty?</h4>
-                <div class="project-text">
-                    <p>
-                      Mothers who work are paid and promoted less, hired less often, and viewed as less competent and committed to their 
-                        organizations compared to women who are not mothers. One one well-identified cause of this "motherhood penalty" is 
-                        discrimination against mothers. While researchers who study the penalty often explain it to be the result of conflicting
-                        cultural meanings that underpin the roles of “mothers” and “workers” in society, but these schemas have not yet been clearly
-                        measured or linked directly to the motherhood penalty. We are working on a project that measures these schemas, and
-                        examines whether recently popularized remote work opportunities can reduce the motherhood penalty by reducing role conflict.
-                </div>
-                <div class="project-image">
-                    <img src="image4.jpg" alt="Motherhood penalty image">
+                <div class="project-media">
+                    <img src="image4.jpg" alt="Motherhood penalty project image" loading="lazy">
                 </div>
             </article>
 
-            <article>
-                <h4>A model of structurally-induced choice homophily</h4>
-                <div class="project-text">
-                    <p>
-                      More soon!
-                    </p>
+            <article class="project-card">
+                <div class="project-copy">
+                    <h2>A model of structurally induced choice homophily</h2>
+                    <p>More soon.</p>
                 </div>
-                <div class="project-image">
-                    <img src="image5.jpg" alt="Homophily simulation image">
+                <div class="project-media">
+                    <img src="image5.jpg" alt="Homophily simulation image" loading="lazy">
                 </div>
             </article>
-
-        </div>
+        </section>
     </main>
 
-    <footer>
-        <p>&copy; 2025 Dynamic Environments and Meaning Change Lab</p>
+    <footer class="site-footer">
+        <div class="site-footer-inner">
+            <p>&copy; 2026 Dynamic Environments and Meaning Change Lab</p>
+        </div>
     </footer>
 </body>
 </html>

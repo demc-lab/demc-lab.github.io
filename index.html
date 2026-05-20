@@ -7,49 +7,70 @@
     <title>Dynamic Environments and Meaning Change Lab</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
-    <header>
-        <h1><a href="index.html" class="title-link">Dynamic Environments and Meaning Change Lab</a></h1>
-        <nav>
-            <ul>
-                <li><a href="index.html">About</a></li>
-                <li><a href="people.html">People</a></li>
-                <li><a href="projects.html">Projects</a></li>
-                <li><a href="publications.html">Publications</a></li>
-                <li><a href="contact.html">Contact</a></li>
-            </ul>
-        </nav>
-    </header>
-    <main>
-        <h2>About the Lab</h2>
-        
-        <p>Welcome to the Dynamic Environments and Meaning Change Lab. We study how big changes in context can shape how 
-            people think about, feel toward, and interact with each other. Our research projects explore the link between 
-            "macro-level" structural conditions - networks, organizations, and informational environments - and "micro-
-            level" pieces of social cognition (which we sometimes call "mental representations," "cultural meanings," or 
-            "stereotypes").</p>
-        
-        <div class="gif-container">
-            <img src="lattice_simulation_comparison_chk.gif" alt="Simulation GIF" class="responsive-gif">
-        </div>
-            
-            <p>DEMC Lab projects are often related to at least one of three motivating questions:</p>
-        
-        <ol>
-        <li>How do macro-level social environments, and changes to these environments, influence meanings people have about 
-            groups, objects, or behaviors they encounter in the world around them? </li>
-        <li>When and how do social environments cause durable (rather than temporary) changes to mental representations about 
-            social identities, exchanges, and interactions?</li>
-        <li>Can systematic changes in person-level cultural meanings enable macro-level social change?</li>
-        </ol>
+<body class="home-page">
+    <section class="home-viz" aria-label="Dynamic network simulation">
+        <canvas id="home-network-viz"></canvas>
+        <div class="home-viz-fade"></div>
+    </section>
 
-        <p>By asking and exploring answers to these questions, we aim to build knowledge about the relationship between  
-            social structures and the beliefs of inviduals within them -- and vice versa. In doing to, we aim to ask rigorous 
-            scientific questions that also have implications for understanding important social issues like discrimination, 
-            segregation, polarization, and stigma.</p>
+    <header class="site-header">
+        <div class="site-header-inner">
+            <a href="index.html" class="site-title">Dynamic Environments and Meaning Change Lab</a>
+            <nav class="site-nav" aria-label="Primary">
+                <ul>
+                    <li><a href="index.html" aria-current="page">About</a></li>
+                    <li><a href="people.html">People</a></li>
+                    <li><a href="projects.html">Projects</a></li>
+                    <li><a href="publications.html">Publications</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="site-main">
+        <section class="page-intro">
+            <h1>About the Lab</h1>
+            <p>
+                Welcome to the Dynamic Environments and Meaning Change Lab. We study how big changes in context can shape
+                how people think about, feel toward, and interact with each other.
+            </p>
+        </section>
+
+        <section class="content-panel">
+            <p>
+                Our research projects explore the link between macro-level structural conditions, such as networks,
+                organizations, and informational environments, and micro-level pieces of social cognition, which we
+                sometimes call mental representations, cultural meanings, or stereotypes.
+            </p>
+
+            <p>DEMC Lab projects are often related to at least one of three motivating questions:</p>
+            <ol>
+                <li>
+                    How do macro-level social environments, and changes to these environments, influence meanings people
+                    have about groups, objects, or behaviors they encounter in the world around them?
+                </li>
+                <li>
+                    When and how do social environments cause durable, rather than temporary, changes to mental
+                    representations about social identities, exchanges, and interactions?
+                </li>
+                <li>Can systematic changes in person-level cultural meanings enable macro-level social change?</li>
+            </ol>
+
+            <p>
+                By asking and exploring answers to these questions, we aim to build knowledge about the relationship between
+                social structures and the beliefs of individuals within them, and vice versa. In doing so, we aim to ask
+                rigorous scientific questions that also have implications for understanding important social issues like
+                discrimination, segregation, polarization, and stigma.
+            </p>
+        </section>
     </main>
-    <footer>
-        <p>&copy; 2025 Dynamic Environments and Meaning Change Lab</p>
+
+    <footer class="site-footer">
+        <div class="site-footer-inner">
+            <p>&copy; 2026 Dynamic Environments and Meaning Change Lab</p>
+        </div>
     </footer>
+    <script src="home-viz.js"></script>
 </body>
 </html>
