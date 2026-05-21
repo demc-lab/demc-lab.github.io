@@ -12,12 +12,13 @@
     const CONTAGION_STEP_MS = 280;
     const HOMOPHILY_BIAS = 0.7;
     const CLOSURE_BIAS = 0.7;
-    const BASE_INFECTED_RATE = 0.1;
+    const BASE_INFECTED_RATE = 0.13;
     const EDGE_CYCLE_FADE_MS = 700;
     const MAX_DPR = 2;
-    const GRAY_95 = 242;
-    const GRAY_40 = 102;
-    const GLOW_RGB = { r: 190, g: 28, b: 56 };
+    const GRAY_10 = 242;
+    const GRAY_90 = 38;
+    const GLOW_CORE_RGB = { r: 69, g: 221, b: 18 };
+    const GLOW_OUTER_RGB = { r: 98, g: 244, b: 12 };
     const ATTRACT_LOCK_MS = 180;
     const ATTRACT_SWITCH_COOLDOWN_MS = 160;
     const ATTRACT_SWITCH_RATIO = 0.7;
@@ -733,13 +734,13 @@
             const isHovered = i === hoveredNode;
             const neighborWeight = hoverNeighborWeight ? hoverNeighborWeight[i] : 0;
 
-            const groupColor = node.group === 0 ? GRAY_95 : GRAY_40;
+            const groupColor = node.group === 0 ? GRAY_10 : GRAY_90;
             const alphaDrift = 0.72 + 0.18 * (0.5 + 0.5 * Math.sin(now * 0.00045 + node.alphaPhase));
             const fillAlpha = 0.5 + alphaDrift * 0.5;
 
             if (neighborWeight > 0.01 && infectedStrength < 0.02 && !isHovered) {
                 const cueRadius = node.radius + 1.8 + neighborWeight * 1.35;
-                const cueAlpha = Math.min(0.24, 0.08 + neighborWeight * 0.2);
+                const cueAlpha = Math.min(0.3, 0.1 + neighborWeight * 0.24);
                 const cue = ctx.createRadialGradient(
                     node.x,
                     node.y,
@@ -748,8 +749,9 @@
                     node.y,
                     cueRadius
                 );
-                cue.addColorStop(0, `rgba(${GLOW_RGB.r}, ${GLOW_RGB.g}, ${GLOW_RGB.b}, ${cueAlpha.toFixed(3)})`);
-                cue.addColorStop(1, `rgba(${GLOW_RGB.r}, ${GLOW_RGB.g}, ${GLOW_RGB.b}, 0)`);
+                cue.addColorStop(0, `rgba(${GLOW_CORE_RGB.r}, ${GLOW_CORE_RGB.g}, ${GLOW_CORE_RGB.b}, ${cueAlpha.toFixed(3)})`);
+                cue.addColorStop(0.58, `rgba(${GLOW_OUTER_RGB.r}, ${GLOW_OUTER_RGB.g}, ${GLOW_OUTER_RGB.b}, ${Math.min(0.34, cueAlpha * 1.08).toFixed(3)})`);
+                cue.addColorStop(1, `rgba(${GLOW_OUTER_RGB.r}, ${GLOW_OUTER_RGB.g}, ${GLOW_OUTER_RGB.b}, 0)`);
                 ctx.fillStyle = cue;
                 ctx.beginPath();
                 ctx.arc(node.x, node.y, cueRadius, 0, Math.PI * 2);
@@ -757,9 +759,9 @@
             }
 
             if (infectedStrength > 0.02 || isHovered) {
-                const glowCore = 0.34 + infectedStrength * 0.5 + (isHovered ? 0.22 : 0);
-                const glowMid = 0.19 + infectedStrength * 0.33 + (isHovered ? 0.12 : 0);
-                const glowRadius = node.radius + 3.0 + infectedStrength * 2.25 + (isHovered ? 0.95 : 0);
+                const glowCore = 0.42 + infectedStrength * 0.58 + (isHovered ? 0.22 : 0);
+                const glowMid = 0.26 + infectedStrength * 0.4 + (isHovered ? 0.14 : 0);
+                const glowRadius = node.radius + 3.2 + infectedStrength * 2.45 + (isHovered ? 1.05 : 0);
                 const gradient = ctx.createRadialGradient(
                     node.x,
                     node.y,
@@ -768,9 +770,10 @@
                     node.y,
                     glowRadius
                 );
-                gradient.addColorStop(0, `rgba(${GLOW_RGB.r}, ${GLOW_RGB.g}, ${GLOW_RGB.b}, ${Math.min(0.9, glowCore).toFixed(3)})`);
-                gradient.addColorStop(0.62, `rgba(${GLOW_RGB.r}, ${GLOW_RGB.g}, ${GLOW_RGB.b}, ${Math.min(0.66, glowMid).toFixed(3)})`);
-                gradient.addColorStop(1, `rgba(${GLOW_RGB.r}, ${GLOW_RGB.g}, ${GLOW_RGB.b}, 0)`);
+                gradient.addColorStop(0, `rgba(${GLOW_CORE_RGB.r}, ${GLOW_CORE_RGB.g}, ${GLOW_CORE_RGB.b}, ${Math.min(0.95, glowCore).toFixed(3)})`);
+                gradient.addColorStop(0.38, `rgba(${GLOW_CORE_RGB.r}, ${GLOW_CORE_RGB.g}, ${GLOW_CORE_RGB.b}, ${Math.min(0.88, glowCore * 0.95).toFixed(3)})`);
+                gradient.addColorStop(0.72, `rgba(${GLOW_OUTER_RGB.r}, ${GLOW_OUTER_RGB.g}, ${GLOW_OUTER_RGB.b}, ${Math.min(0.62, glowMid).toFixed(3)})`);
+                gradient.addColorStop(1, `rgba(${GLOW_OUTER_RGB.r}, ${GLOW_OUTER_RGB.g}, ${GLOW_OUTER_RGB.b}, 0)`);
                 ctx.fillStyle = gradient;
                 ctx.beginPath();
                 ctx.arc(node.x, node.y, glowRadius, 0, Math.PI * 2);
@@ -833,6 +836,26 @@
     function handlePointerDown(event) {
         pointer.inside = true;
         mapPointerEvent(event);
+
+        const now = performance.now();
+        const clickedNode = findHoveredNode();
+        if (clickedNode < 0) {
+            return;
+        }
+
+        if (clickedNode !== hoveredNode && (hoveredNode >= 0 || contagionState !== null)) {
+            beginReset(now);
+        }
+
+        hoveredNode = clickedNode;
+        hoveredSince = now;
+        resetState = null;
+        contagionState = null;
+        buildHoverTargets(clickedNode);
+
+        // Tap/click should initiate contagion immediately on the selected node.
+        hoverContagionStarted = true;
+        startContagion(now);
     }
 
     function resizeCanvas() {
