@@ -1,9 +1,7 @@
-@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap");
-
 :root {
-    --bg: #ffffff;
-    --bg-soft: #f7f7f5;
-    --text: #131313;
+    --bg: #fafaf8;
+    --bg-rgb: 250, 250, 248;
+    --text: #222222;
     --muted: #4f4f4f;
     --max-width: 980px;
 }
@@ -22,10 +20,9 @@ body {
 
 body {
     min-height: 100vh;
-    font-family: "Roboto", "Avenir Next", "Helvetica Neue", "Segoe UI", Arial, sans-serif;
-    font-size: 19px;
-    line-height: 1.62;
-    letter-spacing: 0.004em;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 18px;
+    line-height: 1.6;
     color: var(--text);
     background: var(--bg);
     text-rendering: optimizeLegibility;
@@ -41,6 +38,11 @@ a:hover {
     color: #000000;
 }
 
+a:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 4px;
+}
+
 .site-header {
     background: transparent;
 }
@@ -54,8 +56,8 @@ a:hover {
 .site-title {
     display: inline-block;
     margin: 0 0 0.55rem;
-    font-size: clamp(1.62rem, 3.3vw, 2.28rem);
-    font-weight: 500;
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-weight: 600;
     line-height: 1.15;
     text-decoration: none;
     color: var(--text);
@@ -92,7 +94,7 @@ a:hover {
 }
 
 .page-intro {
-    max-width: 84ch;
+    max-width: 70ch;
     margin-bottom: 1rem;
 }
 
@@ -100,17 +102,16 @@ h1,
 h2,
 h3 {
     margin: 0 0 0.45rem;
-    font-weight: 500;
+    font-weight: 600;
     line-height: 1.2;
-    letter-spacing: 0.006em;
 }
 
 h1 {
-    font-size: clamp(1.88rem, 3.9vw, 2.66rem);
+    font-size: clamp(1.75rem, 3.5vw, 2.25rem);
 }
 
 h2 {
-    font-size: clamp(1.2rem, 2.3vw, 1.52rem);
+    font-size: clamp(1.2rem, 2.3vw, 1.4rem);
 }
 
 h3 {
@@ -131,7 +132,7 @@ li {
 }
 
 .content-panel {
-    max-width: 84ch;
+    max-width: 70ch;
     padding: 0;
     background: transparent;
 }
@@ -143,7 +144,7 @@ li {
     background:
         radial-gradient(circle at 15% 14%, rgba(255, 255, 255, 0.06), transparent 34%),
         radial-gradient(circle at 84% 19%, rgba(255, 255, 255, 0.05), transparent 38%),
-        linear-gradient(180deg, #040404 0%, #050505 42%, #070707 66%, #0d0d0d 80%, #181818 88%, #2b2b2b 92.5%, #5f5f5f 96%, #bdbdbd 98.7%, #ffffff 100%);
+        linear-gradient(180deg, #040404 0%, #050505 42%, #070707 66%, #0d0d0d 80%, #181818 88%, #2b2b2b 92.5%, #5f5f5f 96%, #bdbdbd 98.7%, var(--bg) 100%);
     overflow: hidden;
 }
 
@@ -158,7 +159,7 @@ li {
     inset: auto 0 0;
     height: 22%;
     pointer-events: none;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0) 74%, rgba(255, 255, 255, 0.16) 88%, rgba(255, 255, 255, 0.62) 96%, var(--bg) 100%);
+    background: linear-gradient(180deg, rgba(var(--bg-rgb), 0) 0%, rgba(var(--bg-rgb), 0) 74%, rgba(var(--bg-rgb), 0.16) 88%, rgba(var(--bg-rgb), 0.62) 96%, var(--bg) 100%);
 }
 
 .home-page .site-header-inner {
@@ -237,23 +238,7 @@ li {
 }
 
 .contact-block {
-    max-width: 78ch;
-}
-
-.site-footer {
-    color: var(--muted);
-    font-size: 0.9rem;
-    margin-top: 0.6rem;
-    padding: 0 0 1.55rem;
-}
-
-.site-footer-inner {
-    width: min(100% - 2.6rem, var(--max-width));
-    margin: 0 auto;
-}
-
-.site-footer p {
-    margin: 0;
+    max-width: 70ch;
 }
 
 @media (max-width: 920px) {
@@ -268,8 +253,7 @@ li {
 
 @media (max-width: 640px) {
     .site-header-inner,
-    .site-main,
-    .site-footer-inner {
+    .site-main {
         width: min(100% - 1.5rem, var(--max-width));
     }
 
