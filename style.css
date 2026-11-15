@@ -162,11 +162,11 @@ li {
     background: linear-gradient(180deg, rgba(var(--bg-rgb), 0) 0%, rgba(var(--bg-rgb), 0) 74%, rgba(var(--bg-rgb), 0.16) 88%, rgba(var(--bg-rgb), 0.62) 96%, var(--bg) 100%);
 }
 
-.home-page .site-header-inner {
+.network-page .site-header-inner {
     padding-top: 1.1rem;
 }
 
-.home-page .site-main {
+.network-page .site-main {
     padding-top: 1.1rem;
 }
 

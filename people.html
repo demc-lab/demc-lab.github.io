@@ -6,7 +6,12 @@
     <title>Dynamic Environments and Meaning Change Lab - People</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="network-page">
+    <section class="home-viz" aria-label="Dynamic network simulation">
+        <canvas id="home-network-viz"></canvas>
+        <div class="home-viz-fade"></div>
+    </section>
+
     <header class="site-header">
         <div class="site-header-inner">
             <a href="index.html" class="site-title">Dynamic Environments and Meaning Change Lab</a>
@@ -23,7 +28,7 @@
 
     <main class="site-main">
         <section class="page-intro">
-            <h1>_</h1>
+            <h1>People</h1>
         </section>
 
         <section class="team-stack">
@@ -38,6 +43,7 @@
                 <div class="person-lines">
                     <p>Valerie Barron</p>
                     <p>Mohona Mandal</p>
+                    <p><a href="https://sociology.wisc.edu/staff/samaddar-bijoyetri/" target="_blank" rel="noopener noreferrer">Bijoyetri Samaddar</a></p>
                 </div>
             </article>
 
@@ -45,7 +51,6 @@
                 <h2>Undergraduate Students</h2>
                 <div class="person-lines">
                     <p>Joshua Evans</p>
-                    <p>Jonathan Harris</p>
                     <p>Gabby Hosey</p>
                     <p>Aaron McLeod</p>
                 </div>
@@ -60,5 +65,6 @@
             </article>
         </section>
     </main>
+    <script src="home-viz.js"></script>
 </body>
 </html>
